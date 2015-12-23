@@ -34,6 +34,8 @@ class Sucher {
 		if (params.postleitzahl) l[3] = 1
 		if (params.ort) l[4] = 1
 		
+		if (l == [1,0,0,0,1])
+			return getMatchesStrasseOrt(params.strasse, params.ort)
 		if (l == [0,0,0,0,1]) 
 			return getMatchesOrt(params.ort)
 		if (l == [0,0,0,1,0])
@@ -88,9 +90,42 @@ class Sucher {
 		sList
 	}
 	
-	private static Boolean hatStrVerz (Long plzId) {
-		String s = "from Strasse as s where s.plz.id = ${plzId}"
-		def strassen = Strasse.findAll(s)
-		!strassen.empty
+	static List getMatchesStrasseOrt(String strasse, String ort) {
+		
+		List <Sucher> sList = []
+		String hOrt = ort+'%'
+		def query = Postleitzahl.where {
+			ort =~ hOrt
+		}
+		query.findAll().each {Postleitzahl p ->
+			String q = "from Strasse as s where s.plz.id = ${p.id}"
+			def strassen = Strasse.findAll(q)
+			if (strassen.empty) {
+				Sucher s = new Sucher()
+				s.postleitzahl = p.plz
+				s.ort = p.ort
+				s.strasse = strasse
+				sList << s
+			}
+			else {
+				strassen.each {Strasse str ->
+					if (strasse.size() < str.strasse.size() && strasse == str.strasse.substring(0, strasse.size())) {
+						Sucher s = new Sucher()
+						s.postleitzahl = p.plz
+						s.ort = p.ort
+						s.strasse = str.strasse
+						s.hnrVon = str.hnrVon
+						s.hnrBis = str.hnrBis
+						s.zusVon = str.zusVon
+						s.zusBis = str.zusBis
+						sList << s
+					}
+				}
+			}
+			
+		}
+		sList
+		
 	}
+	
 }

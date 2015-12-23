@@ -27,6 +27,10 @@
 						<g:sortableColumn property="ort" title="${message(code: 'postleitzahl.ort.label')}" />
 						
 						<g:sortableColumn property="strasse" title="${message(code: 'postleitzahl.strasse.label')}" />
+						
+						<g:sortableColumn property="hnrVon" title="${message(code: 'strasse.hnrVon.label')}" />
+						
+						<g:sortableColumn property="hnrBis" title="${message(code: 'strasse.hnrBis.label')}" />
 								
 					</tr>
 				</thead>
@@ -39,6 +43,10 @@
 						<td>${fieldValue(bean: sucherInstance, field: "ort")}</td>
 						
 						<td>${fieldValue(bean: sucherInstance, field: "strasse")}</td>
+						
+						<td>${fieldValue(bean: sucherInstance, field: "hnrVon")}</td>
+						
+						<td>${fieldValue(bean: sucherInstance, field: "hnrBis")}</td>
 											
 					</tr>
 				</g:each>
