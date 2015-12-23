@@ -10,6 +10,11 @@ class Sucher {
 	String zusatz
 	Integer postleitzahl
 	String ort
+	
+	Integer hnrVon
+	String zusVon
+	Integer hnrBis
+	String zusBis
 
     static constraints = {
 		strasse(nullable:true)
@@ -38,19 +43,54 @@ class Sucher {
 	
 	static List getMatchesOrt(String ort) {
 		
+		List <Sucher> sList = []
 		String hOrt = ort+'%'
 		def query = Postleitzahl.where {
 			ort =~ hOrt
 		}
-		query.findAll()
+		query.findAll().each {Postleitzahl p ->
+			Sucher s = new Sucher()
+			s.postleitzahl = p.plz
+			s.ort = p.ort
+			sList << s
+		}
+		sList
 	} 
 	
 	static List getMatchesPlz(String plz) {
 		
+		List <Sucher> sList = []
 		Integer hPlz = plz.toInteger()
 		def query = Postleitzahl.where {
 			plz == hPlz
 		}
-		query.findAll()
+		query.findAll().each {Postleitzahl p ->
+			String q = "from Strasse as s where s.plz.id = ${p.id}"
+			def strassen = Strasse.findAll(q)
+			if (strassen.empty) {
+				Sucher s = new Sucher()
+				s.postleitzahl = p.plz
+				s.ort = p.ort
+				sList << s
+			}
+			else strassen.each {Strasse str -> 
+				Sucher s = new Sucher()
+				s.postleitzahl = p.plz
+				s.ort = p.ort
+				s.strasse = str.strasse
+				s.hnrVon = str.hnrVon
+				s.hnrBis = str.hnrBis
+				s.zusVon = str.zusVon
+				s.zusBis = str.zusBis
+				sList << s
+			}
+		}
+		sList
+	}
+	
+	private static Boolean hatStrVerz (Long plzId) {
+		String s = "from Strasse as s where s.plz.id = ${plzId}"
+		def strassen = Strasse.findAll(s)
+		!strassen.empty
 	}
 }

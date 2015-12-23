@@ -25,6 +25,8 @@
 						<g:sortableColumn property="plz" title="${message(code: 'postleitzahl.plz.label')}" />
 					
 						<g:sortableColumn property="ort" title="${message(code: 'postleitzahl.ort.label')}" />
+						
+						<g:sortableColumn property="strasse" title="${message(code: 'postleitzahl.strasse.label')}" />
 								
 					</tr>
 				</thead>
@@ -32,9 +34,11 @@
 				<g:each in="${sucherInstanceList}" status="i" var="sucherInstance">
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
 					
-						<td>${fieldValue(bean: sucherInstance, field: "plz")}</td>
+						<td>${fieldValue(bean: sucherInstance, field: "postleitzahl")}</td>
 						
 						<td>${fieldValue(bean: sucherInstance, field: "ort")}</td>
+						
+						<td>${fieldValue(bean: sucherInstance, field: "strasse")}</td>
 											
 					</tr>
 				</g:each>
