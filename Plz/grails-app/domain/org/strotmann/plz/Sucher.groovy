@@ -29,13 +29,13 @@ class Sucher {
 		List l = [0,0,0,0,0]
 		
 		if (params.strasse) l[0] = 1
-		if (params.hausnumer) l[1] = 1
+		if (params.hausnummer) l[1] = 1
 		if (params.zusatz) l[2] = 1
 		if (params.postleitzahl) l[3] = 1
 		if (params.ort) l[4] = 1
 		
-		if (l == [1,0,0,0,1])
-			return getMatchesStrasseOrt(params.strasse, params.ort)
+		if (l == [1,0,0,0,1] || l == [1,1,0,0,1]) 
+			return getMatchesStrasseHnrOrt(params.strasse, params.hausnummer, params.ort)
 		if (l == [0,0,0,0,1]) 
 			return getMatchesOrt(params.ort)
 		if (l == [0,0,0,1,0])
@@ -89,8 +89,8 @@ class Sucher {
 		}
 		sList
 	}
-	
-	static List getMatchesStrasseOrt(String strasse, String ort) {
+		
+	static List getMatchesStrasseHnrOrt(String strasse, String hnr, String ort) {
 		
 		List <Sucher> sList = []
 		String hOrt = ort+'%'
@@ -104,7 +104,6 @@ class Sucher {
 				Sucher s = new Sucher()
 				s.postleitzahl = p.plz
 				s.ort = p.ort
-				s.strasse = strasse
 				sList << s
 			}
 			else {
@@ -122,10 +121,17 @@ class Sucher {
 					}
 				}
 			}
-			
 		}
-		sList
-		
+		if (!hnr)
+			return sList
+			
+		//Berücksichtigung der Hausnummer	
+		List <Sucher> sHnrList = []
+		sList.each {Sucher s ->
+			if (!s.hnrVon || (hnr.toInteger() >= s.hnrVon &&  hnr.toInteger() <= s.hnrBis))
+			sHnrList << s
+		}
+		sHnrList
 	}
 	
 }
