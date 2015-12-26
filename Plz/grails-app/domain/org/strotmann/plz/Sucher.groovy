@@ -125,11 +125,19 @@ class Sucher {
 		if (!hnr)
 			return sList
 			
-		//Berücksichtigung der Hausnummer	
+		//Berücksichtigung der Hausnummer incl. gerade/ungerade (Straßenseite)	
 		List <Sucher> sHnrList = []
 		sList.each {Sucher s ->
-			if (!s.hnrVon || (hnr.toInteger() >= s.hnrVon &&  hnr.toInteger() <= s.hnrBis))
-			sHnrList << s
+			
+			def boolean c1 = !s.hnrVon
+			def boolean c2, c3
+			if (s.hnrVon) {
+				c2 = hnr.toInteger() >= s.hnrVon &&  hnr.toInteger() <= s.hnrBis
+				c3 = (hnr.toInteger() % 2) == (s.hnrVon % 2)
+			}
+			
+			if (c1 || (c2 && c3))
+				sHnrList << s
 		}
 		sHnrList
 	}
