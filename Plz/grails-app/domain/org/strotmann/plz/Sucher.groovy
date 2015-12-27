@@ -100,13 +100,8 @@ class Sucher {
 		query.findAll().each {Postleitzahl p ->
 			String q = "from Strasse as s where s.plz.id = ${p.id}"
 			def strassen = Strasse.findAll(q)
-			if (strassen.empty) {
-				Sucher s = new Sucher()
-				s.postleitzahl = p.plz
-				s.ort = p.ort
-				sList << s
-			}
-			else {
+			if (!strassen.empty) {
+				
 				strassen.each {Strasse str ->
 					if (strasse.size() <= str.strasse.size() && strasse == str.strasse.substring(0, strasse.size())) {
 						Sucher s = new Sucher()

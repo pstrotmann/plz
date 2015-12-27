@@ -20,15 +20,6 @@
 
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: sucherInstance, field: 'zusatz', 'error')} ">
-	<label for="zusatz">
-		<g:message code="sucher.zusatz.label" default="Zusatz" />
-		
-	</label>
-	<g:textField name="zusatz" value="${sucherInstance?.zusatz}"/>
-
-</div>
-
 <div class="fieldcontain ${hasErrors(bean: sucherInstance, field: 'postleitzahl', 'error')} ">
 	<label for="postleitzahl">
 		<g:message code="sucher.postleitzahl.label" default="Postleitzahl" />
