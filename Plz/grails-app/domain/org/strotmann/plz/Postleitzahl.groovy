@@ -10,12 +10,16 @@ class Postleitzahl {
 	Integer osmId
 	String ort
 	Integer bundesland
+	String gkMerk
+	String grosskunde
 	
     static constraints = {
 		plz()
 		osmId(nullable:true)
 		ort()
 		bundesland(inList:bundeslandIds)
+		gkMerk(nullable:true, inList:['-','+','*'])
+		grosskunde(nullable:true)
     }
 	
 	String toString() {"${this.plz}  ${this.ort}" }
