@@ -118,7 +118,7 @@ class Sucher {
 			}
 		}
 		if (!hnr)
-			return sList
+			return sList.sort{a,b -> a.ort <=> b.ort?:(a.strasse<=>b.strasse)?:(a.hnrVon<=>b.hnrVon)}
 			
 		//Berücksichtigung der Hausnummer incl. gerade/ungerade (Straßenseite)	
 		List <Sucher> sHnrList = []
@@ -134,7 +134,7 @@ class Sucher {
 			if (c1 || (c2 && c3))
 				sHnrList << s
 		}
-		sHnrList
+		sHnrList.sort{a,b -> a.ort <=> b.ort?:(a.strasse<=>b.strasse)?:(a.hnrVon<=>b.hnrVon)}
 	}
 	
 }
