@@ -93,9 +93,13 @@
 			<div id="controller-list" role="navigation">
 				<h2></h2>
 				<ul>
-					<li class="controller"><g:link controller="postleitzahl">Postleitzahl</g:link></li>
-					<li class="controller"><g:link controller="strasse">Strasse</g:link></li>
 					<li class="controller"><g:link controller="Sucher">Suchen</g:link></li>
+					<h3><g:message code="app.title1" default="Verwaltung"/></h3>
+					<ul>
+						<li class="controller"><g:link controller="postleitzahl">Postleitzahl</g:link></li>
+						<li class="controller"><g:link controller="strasse">Strasse</g:link></li>
+					</ul>
+					
 				</ul>
 			</div>
 		</div>
