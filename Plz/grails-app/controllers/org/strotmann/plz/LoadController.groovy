@@ -8,42 +8,31 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem
 class LoadController {
 	
 	def index() {
-    //def ladePlzFfM() {
-		render ("Straßen Tabelle wird aus ExcelDatei geladen")
+		render ("Plz Tabelle wird aus ExcelDatei geladen")
 		// öffnen ExcelDatei
-		POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/vol/strassenFrankfurt2014.xls"));
+		POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/vol/grosskundenPlz.xls"));
 		HSSFWorkbook bBkTab = new HSSFWorkbook(fs);
 		HSSFSheet bBkSheet = bBkTab.getSheetAt(0);
-		for (int i = 1; i <= bBkSheet.getLastRowNum(); i++)
-		//for (int i = 0; i <= 12; i++)
+		for (int i = 0; i < bBkSheet.getLastRowNum(); i++)
 		{
 			HSSFRow row = bBkSheet.getRow(i);
-			params.strasse = row.getCell(0).getStringCellValue()
 			
-			if (!row.getCell(1) || row.getCell(1).getCellType() == 1)
-				params.hnrVon = null
+			params.plz = row.getCell(0).getNumericCellValue().toInteger()
+			params.ort = row.getCell(1).getStringCellValue()
+			params.gkMerk = row.getCell(2).getStringCellValue()
+			params.grosskunde = row.getCell(3).getStringCellValue()
+			String hOrt = params.ort+'%'
+			def query = Postleitzahl.where {
+				ort =~ hOrt
+			}
+			List <Postleitzahl> plzList = query.findAll()
+			if (plzList.empty)
+				params.bundesland = 0
 			else
-				params.hnrVon = row.getCell(1).getNumericCellValue().toInteger();
+				params.bundesland = plzList[0].bundesland
 				
-			if (!row.getCell(2) || row.getCell(2).getStringCellValue().trim() == '')
-				params.zusVon = null
-			else
-				params.zusVon = row.getCell(2).getStringCellValue()
-				
-			if (!row.getCell(3) || row.getCell(3).getCellType() == 1)
-				params.hnrBis = null
-			else
-				params.hnrBis = row.getCell(3).getNumericCellValue().toInteger();
-				
-			if (!row.getCell(4) || row.getCell(4).getStringCellValue().trim() == '')
-				params.zusBis = null
-			else
-				params.zusBis = row.getCell(4).getStringCellValue()
-			
-			String q = "from Postleitzahl as p where p.plz = ${row.getCell(5).getNumericCellValue().toInteger()}"
-			params.plz = Postleitzahl.find(q)
 			try {
-				def b = new Strasse (params)
+				def b = new Postleitzahl (params)
 				if (!b.save(flush:true)) {
 					b.errors.each {
 						println it
@@ -55,8 +44,58 @@ class LoadController {
 				e.printStackTrace()
 			}
 		}
-		render ("Strassen Tabelle wurde aus ExcelDatei geladen")
+		render ("PLZ Tabelle wurde aus ExcelDatei geladen")
 	}
+	
+	def ladePlzFfM() {
+			render ("Straßen Tabelle wird aus ExcelDatei geladen")
+			// öffnen ExcelDatei
+			POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/vol/strassenFrankfurt2014.xls"));
+			HSSFWorkbook bBkTab = new HSSFWorkbook(fs);
+			HSSFSheet bBkSheet = bBkTab.getSheetAt(0);
+			for (int i = 1; i <= bBkSheet.getLastRowNum(); i++)
+			//for (int i = 0; i <= 12; i++)
+			{
+				HSSFRow row = bBkSheet.getRow(i);
+				params.strasse = row.getCell(0).getStringCellValue()
+				
+				if (!row.getCell(1) || row.getCell(1).getCellType() == 1)
+					params.hnrVon = null
+				else
+					params.hnrVon = row.getCell(1).getNumericCellValue().toInteger();
+					
+				if (!row.getCell(2) || row.getCell(2).getStringCellValue().trim() == '')
+					params.zusVon = null
+				else
+					params.zusVon = row.getCell(2).getStringCellValue()
+					
+				if (!row.getCell(3) || row.getCell(3).getCellType() == 1)
+					params.hnrBis = null
+				else
+					params.hnrBis = row.getCell(3).getNumericCellValue().toInteger();
+					
+				if (!row.getCell(4) || row.getCell(4).getStringCellValue().trim() == '')
+					params.zusBis = null
+				else
+					params.zusBis = row.getCell(4).getStringCellValue()
+				
+				String q = "from Postleitzahl as p where p.plz = ${row.getCell(5).getNumericCellValue().toInteger()}"
+				params.plz = Postleitzahl.find(q)
+				try {
+					def b = new Strasse (params)
+					if (!b.save(flush:true)) {
+						b.errors.each {
+							println it
+							render (it)
+						}
+					}
+									
+				} catch (Exception e) {
+					e.printStackTrace()
+				}
+			}
+			render ("Strassen Tabelle wurde aus ExcelDatei geladen")
+		}
 	
 	def ladePlz() {
 		render ("Plz Tabelle wird aus ExcelDatei geladen")
