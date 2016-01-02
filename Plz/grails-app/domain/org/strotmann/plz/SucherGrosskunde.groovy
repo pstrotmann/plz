@@ -24,6 +24,10 @@ class SucherGrosskunde {
 		
 		if (l == [1,0])
 			return getMatchesOrt(params.ort)
+		if (l == [0,1])
+			return getMatchesGrosskunde(params.grosskunde)
+		if (l == [1,1])
+			return getMatchesOrtGrosskunde(params.ort,params.grosskunde)
 	}
 	
 	static List getMatchesOrt(String ort) {
@@ -31,7 +35,7 @@ class SucherGrosskunde {
 		List <Sucher> sList = []
 		String hOrt = ort+'%'
 		def query = Postleitzahl.where {
-			 grosskunde != null && ort =~ hOrt
+			grosskunde != null && grosskunde != '...' && ort =~ hOrt
 		}
 		query.findAll().each {Postleitzahl p ->
 			SucherGrosskunde s = new SucherGrosskunde()
@@ -40,6 +44,41 @@ class SucherGrosskunde {
 			s.grosskunde = p.grosskunde
 			sList << s
 		}
-		sList
+		sList.sort{SucherGrosskunde gk -> gk.grosskunde}
+	}
+	
+	static List getMatchesGrosskunde(String grosskunde) {
+		
+		List <Sucher> sList = []
+		String hGrosskunde = grosskunde+'%'
+		def query = Postleitzahl.where {
+			grosskunde != null && grosskunde != '...' && grosskunde =~ hGrosskunde
+		}
+		query.findAll().each {Postleitzahl p ->
+			SucherGrosskunde s = new SucherGrosskunde()
+			s.postleitzahl = p.plz
+			s.ort = p.ort
+			s.grosskunde = p.grosskunde
+			sList << s
+		}
+		sList.sort{SucherGrosskunde gk -> gk.ort}
+	}
+	
+	static List getMatchesOrtGrosskunde(String ort, String grosskunde) {
+		
+		List <Sucher> sList = []
+		String hOrt = ort+'%'
+		String hGrosskunde = grosskunde+'%'
+		def query = Postleitzahl.where {
+			grosskunde != null && grosskunde != '...' && ort =~ hOrt && grosskunde =~ hGrosskunde
+		}
+		query.findAll().each {Postleitzahl p ->
+			SucherGrosskunde s = new SucherGrosskunde()
+			s.postleitzahl = p.plz
+			s.ort = p.ort
+			s.grosskunde = p.grosskunde
+			sList << s
+		}
+		sList.sort{SucherGrosskunde gk -> gk.plz}
 	}
 }

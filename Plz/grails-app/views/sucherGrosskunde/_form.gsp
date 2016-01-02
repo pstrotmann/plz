@@ -1,16 +1,5 @@
 <%@ page import="org.strotmann.plz.SucherGrosskunde" %>
 
-
-
-<div class="fieldcontain ${hasErrors(bean: sucherGrosskundeInstance, field: 'postleitzahl', 'error')} ">
-	<label for="postleitzahl">
-		<g:message code="sucherGrosskunde.postleitzahl.label" default="Postleitzahl" />
-		
-	</label>
-	<g:field name="postleitzahl" type="number" value="${sucherGrosskundeInstance.postleitzahl}"/>
-
-</div>
-
 <div class="fieldcontain ${hasErrors(bean: sucherGrosskundeInstance, field: 'ort', 'error')} ">
 	<label for="ort">
 		<g:message code="sucherGrosskunde.ort.label" default="Ort" />
