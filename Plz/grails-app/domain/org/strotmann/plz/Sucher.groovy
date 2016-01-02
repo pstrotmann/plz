@@ -103,7 +103,7 @@ class Sucher {
 			if (!strassen.empty) {
 				
 				strassen.each {Strasse str ->
-					if (strasse.size() <= str.strasse.size() && strasse == str.strasse.substring(0, strasse.size())) {
+					if (strasse.size() <= str.strasse.size() && strasse.toUpperCase() == str.strasse.substring(0, strasse.size()).toUpperCase()) {
 						Sucher s = new Sucher()
 						s.postleitzahl = p.plz
 						s.ort = p.ort

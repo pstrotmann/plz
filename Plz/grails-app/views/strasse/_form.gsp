@@ -52,7 +52,7 @@
 		<g:message code="strasse.plz.label" default="Plz" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:select id="plz" name="plz.id" from="${org.strotmann.plz.Postleitzahl.list()}" optionKey="id" required="" value="${strasseInstance?.plz?.id}" class="many-to-one"/>
+	<g:select id="plz" name="plz.id" from="${org.strotmann.plz.Postleitzahl.sortiertNachPlz}" optionKey="id" required="" value="${strasseInstance?.plz?.id}" class="many-to-one"/>
 
 </div>
 

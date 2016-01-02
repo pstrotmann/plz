@@ -37,6 +37,10 @@ class Postleitzahl {
 		found.key
 	}
 	
+	static getSortiertNachPlz() {
+		Postleitzahl.list().sort{it.plz}
+	}
+	
 	String getBundeslandKlar () {
 		Holders.config.bundesland[bundesland]
 	}

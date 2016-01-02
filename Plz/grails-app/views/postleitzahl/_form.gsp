@@ -34,7 +34,7 @@
 		<g:message code="postleitzahl.bundesland.label" default="Bundesland" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:select name="bundesland" from="${postleitzahlInstance.constraints.bundesland.inList}" required="" value="${fieldValue(bean: postleitzahlInstance, field: 'bundesland')}" valueMessagePrefix="postleitzahl.bundesland"/>
+	<g:select name="bundesland" from="${postleitzahlInstance.constraints.bundesland.inList}" value="${postleitzahlInstance?.bundesland}" valueMessagePrefix="bundesland.category"/>
 
 </div>
 
