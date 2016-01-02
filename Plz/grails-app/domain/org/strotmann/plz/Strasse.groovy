@@ -10,7 +10,7 @@ class Strasse {
 	Postleitzahl plz
 
     static constraints = {
-		strasse(unique: ['plz', 'hnrVon', 'zusVon'])
+		strasse(unique:['plz','strasse','hnrVon','zusVon'])
 		hnrVon(nullable:true)
 		zusVon(nullable:true)
 		hnrBis(nullable:true)

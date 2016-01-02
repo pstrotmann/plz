@@ -8,6 +8,82 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem
 class LoadController {
 	
 	def index() {
+		render ("Straßen Tabelle wird aus ExcelDatei geladen")
+		// öffnen ExcelDatei
+		POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/vol/strassenKöln.xls"));
+		HSSFWorkbook bBkTab = new HSSFWorkbook(fs);
+		HSSFSheet bBkSheet = bBkTab.getSheetAt(0);
+		for (int i = 1; i < bBkSheet.getLastRowNum(); i++)
+		//for (int i = 1; i < 20; i++)
+		{
+			HSSFRow row = bBkSheet.getRow(i)
+			
+			params.strasse = row.getCell(0).getStringCellValue()
+			
+			String q = "from Postleitzahl as p where p.plz = ${row.getCell(1).getNumericCellValue().toInteger()}"
+			params.plz = Postleitzahl.find(q)
+			
+			def List n = []
+			def List a = []
+			for (int j = 2; j < 6; j++) {
+				if (row.getCell(j)) {
+					if (row.getCell(j).getCellType() == 0) {
+						n[j-2]=row.getCell(j).getNumericCellValue().toInteger()
+						a[j-2]=null
+					}
+					else {
+						n[j-2]=row.getCell(j).getStringCellValue().substring(0, 4).toInteger()
+						a[j-2]=row.getCell(j).getStringCellValue().substring(4)
+					}
+				}
+				else {
+					n[j-2]=null
+					a[j-2]=null
+				}
+			}
+			
+			if (n[0]) {
+				params.hnrVon = n[0]
+				params.zusVon = a[0]
+				params.hnrBis = n[1]
+				params.zusBis = a[1]
+				updStr(i)
+			}
+			if (n[2]) {
+				params.hnrVon = n[2]
+				params.zusVon = a[2]
+				params.hnrBis = n[3]
+				params.zusBis = a[3]
+				updStr(i)
+			}
+			if (n == [null,null,null,null]) {
+				params.hnrVon = null
+				params.zusVon = null
+				params.hnrBis = null
+				params.zusBis = null
+				updStr(i)
+			}
+		}
+		render ("Strassen Tabelle wurde aus ExcelDatei geladen")
+	}
+	
+	private updStr (Integer i) {
+		println "i=${i} ${params}"
+		try {
+			def b = new Strasse (params)
+			if (!b.save(flush:true)) {
+				b.errors.each {
+					println it
+					render (it)
+				}
+			}
+							
+		} catch (Exception e) {
+			e.printStackTrace()
+		}
+	}
+	
+	def ladeGrosskunden() {
 		render ("Plz Tabelle wird aus ExcelDatei geladen")
 		// öffnen ExcelDatei
 		POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/vol/grosskundenPlz.xls"));
