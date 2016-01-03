@@ -38,3 +38,12 @@
 
 </div>
 
+<div class="fieldcontain ${hasErrors(bean: postleitzahlInstance, field: 'grosskunde', 'error')} ">
+	<label for="grosskunde">
+		<g:message code="postleitzahl.grosskunde.label" default="Großkunde" />
+		
+	</label>
+	<g:textField name="grosskunde" value="${postleitzahlInstance.grosskunde}" />
+
+</div>
+

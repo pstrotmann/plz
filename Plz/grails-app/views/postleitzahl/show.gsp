@@ -31,6 +31,15 @@
 					
 				</li>
 				</g:if>
+				
+				<g:if test="${postleitzahlInstance?.grosskunde}">
+				<li class="fieldcontain">
+					<span id="bundesland-label" class="property-label"><g:message code="postleitzahl.grosskunde.label" default="Großkunde" /></span>
+					
+						<span class="property-value" aria-labelledby="grosskunde-label"><g:fieldValue bean="${postleitzahlInstance}" field="grosskunde"/></span>
+					
+				</li>
+				</g:if>
 			
 				<g:if test="${postleitzahlInstance?.osmId}">
 				<li class="fieldcontain">
@@ -58,6 +67,7 @@
 					
 				</li>
 				</g:if>
+				
 			
 			</ol>
 			<g:form url="[resource:postleitzahlInstance, action:'delete']" method="DELETE">

@@ -48,7 +48,7 @@ class Sucher {
 		List <Sucher> sList = []
 		String hOrt = ort+'%'
 		def query = Postleitzahl.where {
-			ort =~ hOrt
+			ort =~ hOrt && grosskunde == null
 		}
 		query.findAll().each {Postleitzahl p ->
 			Sucher s = new Sucher()
@@ -95,7 +95,7 @@ class Sucher {
 		List <Sucher> sList = []
 		String hOrt = ort+'%'
 		def query = Postleitzahl.where {
-			ort =~ hOrt
+			ort =~ hOrt && grosskunde == null
 		}
 		query.findAll().each {Postleitzahl p ->
 			String q = "from Strasse as s where s.plz.id = ${p.id}"
