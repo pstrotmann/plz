@@ -17,17 +17,37 @@ class SucherGrosskunde {
 	
 	static List getMatches(Map params) {
 		
-		List l = [0,0]
+		List l = [0,0,0]
 		
-		if (params.ort) l[0] = 1
-		if (params.grosskunde) l[1] = 1
+		if (params.postleitzahl) l[0] = 1
+		if (params.ort) l[1] = 1
+		if (params.grosskunde) l[2] = 1
 		
-		if (l == [1,0])
+		if (l == [1,0,0])
+			return getMatchesPlz(params.postleitzahl)
+		if (l == [0,1,0])
 			return getMatchesOrt(params.ort)
-		if (l == [0,1])
+		if (l == [0,0,1])
 			return getMatchesGrosskunde(params.grosskunde)
-		if (l == [1,1])
+		if (l == [0,1,1])
 			return getMatchesOrtGrosskunde(params.ort,params.grosskunde)
+	}
+	
+	static List getMatchesPlz(String plz) {
+		
+		List <Sucher> sList = []
+		Integer hPlz = plz.toInteger()
+		def query = Postleitzahl.where {
+			plz == hPlz && grosskunde != null
+		}
+		query.findAll().each {Postleitzahl p ->
+			SucherGrosskunde s = new SucherGrosskunde()
+			s.postleitzahl = p.plz
+			s.ort = p.ort
+			s.grosskunde = p.grosskunde
+			sList << s
+		}
+		sList.sort{SucherGrosskunde gk -> gk.grosskunde}
 	}
 	
 	static List getMatchesOrt(String ort) {

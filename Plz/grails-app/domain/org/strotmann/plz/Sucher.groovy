@@ -63,7 +63,7 @@ class Sucher {
 		List <Sucher> sList = []
 		Integer hPlz = plz.toInteger()
 		def query = Postleitzahl.where {
-			plz == hPlz
+			plz == hPlz && grosskunde == null
 		}
 		query.findAll().each {Postleitzahl p ->
 			String q = "from Strasse as s where s.plz.id = ${p.id}"

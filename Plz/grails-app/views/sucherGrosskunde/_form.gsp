@@ -11,10 +11,19 @@
 
 <div class="fieldcontain ${hasErrors(bean: sucherGrosskundeInstance, field: 'grosskunde', 'error')} ">
 	<label for="grosskunde">
-		<g:message code="sucherGrosskunde.grosskunde.label" default="Grosskunde" />
+		<g:message code="sucherGrosskunde.grosskunde.label" default="Großempfänger" />
 		
 	</label>
 	<g:textField name="grosskunde" value="${sucherGrosskundeInstance?.grosskunde}"/>
+
+</div>
+
+<div class="fieldcontain ${hasErrors(bean: sucherGrosskundeInstance, field: 'plz', 'error')} ">
+	<label for="ort">
+		<g:message code="sucherGrosskunde.plz.label" default="Großempfängerpostleitzahl" />
+		
+	</label>
+	<g:textField name="postleitzahl" value="${sucherGrosskundeInstance?.postleitzahl}"/>
 
 </div>
 

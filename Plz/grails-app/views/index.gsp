@@ -96,7 +96,7 @@
 					<h3><g:message code="app.title1" default="Suchen"/></h3>
 					<ul>
 						<li class="controller"><g:link controller="sucher">Zustellbezirke</g:link></li>
-						<li class="controller"><g:link controller="sucherGrosskunde">Großkunden</g:link></li>
+						<li class="controller"><g:link controller="sucherGrosskunde">Großempfänger</g:link></li>
 					</ul>
 					<h3><g:message code="app.title1" default="Verwaltung"/></h3>
 					<ul>

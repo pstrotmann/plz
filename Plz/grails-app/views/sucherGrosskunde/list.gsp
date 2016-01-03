@@ -26,7 +26,7 @@
 					
 						<g:sortableColumn property="ort" title="${message(code: 'postleitzahl.ort.label')}" />
 						
-						<g:sortableColumn property="strasse" title="${message(code: 'postleitzahl.grosskunde.label')}" />
+						<g:sortableColumn property="grosskunde" title="${message(code: 'postleitzahl.grosskunde.label')}" />
 					</tr>
 				</thead>
 				<tbody>
