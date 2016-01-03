@@ -22,6 +22,10 @@ class Postleitzahl {
 		grosskunde(nullable:true)
     }
 	
+	static mapping = {
+		plz column: "plz", index: "plz"
+	}
+	
 	String toString() {"${this.plz}  ${this.ort}" }
 	
 	static List getBundeslandIds () {
@@ -43,11 +47,5 @@ class Postleitzahl {
 	
 	String getBundeslandKlar () {
 		Holders.config.bundesland[bundesland]
-	}
-	
-	Boolean getMitStrassen () {
-		String q = "from Strasse as s where s.plz = ${id}"
-		def strassen = Strasse.findAll(q)
-		!strassen.empty
 	}
 }
