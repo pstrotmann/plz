@@ -19,23 +19,31 @@ class SucherGrosskunde {
 		
 		List l = [0,0,0]
 		
+		def String grEmpf
+		
 		if (params.postleitzahl) l[0] = 1
 		if (params.ort) l[1] = 1
-		if (params.grosskunde) l[2] = 1
-		
+		if (params.grosskunde) {
+			 l[2] = 1
+			 grEmpf = params.grosskunde
+		}
+		if (params.grossempfaenger) {
+			 l[2] = 1
+			 grEmpf = params.grossempfaenger
+		}
 		if (l == [1,0,0])
 			return getMatchesPlz(params.postleitzahl)
 		if (l == [0,1,0])
 			return getMatchesOrt(params.ort)
 		if (l == [0,0,1])
-			return getMatchesGrosskunde(params.grosskunde)
+			return getMatchesGrosskunde(grEmpf)
 		if (l == [0,1,1])
-			return getMatchesOrtGrosskunde(params.ort,params.grosskunde)
+			return getMatchesOrtGrosskunde(params.ort,grEmpf)
 	}
 	
 	static List getMatchesPlz(String plz) {
 		
-		List <Sucher> sList = []
+		List <SucherGrosskunde> sList = []
 		Integer hPlz = plz.toInteger()
 		def query = Postleitzahl.where {
 			plz == hPlz && grosskunde != null
@@ -99,7 +107,7 @@ class SucherGrosskunde {
 			s.grosskunde = p.grosskunde
 			sList << s
 		}
-		sList.sort{SucherGrosskunde gk -> gk.plz}
+		sList.sort{SucherGrosskunde gk -> gk.postleitzahl}
 	}
 	
 	String getPlz5(){

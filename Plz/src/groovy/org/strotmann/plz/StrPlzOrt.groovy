@@ -7,7 +7,7 @@ class StrPlzOrt {
 	String zusVon
 	Integer hnrBis
 	String zusBis
-	Integer postleitzahl
+	String postleitzahl
 	String ort
 
 }

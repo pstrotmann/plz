@@ -11,71 +11,36 @@ class WebServiceController extends RestfulController {
 	
 	WebServiceController() {}
 	
-	//localhost:8080/Plz/WebService/get?plz=44339
+	//localhost:8080/Plz/WebService/get?ort=Dortmund&strasse=Evinger
 	def get(){
-		def entry = params.find{ k, v -> Postleitzahl.metaClass.hasMetaProperty k }
-		if( entry ) {
-		  if (entry.key == 'id')
-			  entry.value = entry.value.toLong()
-		  if (entry.key == 'plz' || entry.key == 'osmId' || entry.key == 'bundesland')
-			entry.value = entry.value.toInteger()
-			
-		  render (Postleitzahl.withCriteria() { eq (entry.key, entry.value) } as JSON)
-		}
-		 else
-		  render text:'not found!'
-	}
-	
-	//localhost:8080/Plz/WebService/getViaOrtStrasse?ort=Dortmund&strasse=Evinger
-	def getViaOrtStrasse(){
-		def List strPlzOrte = []
-		def List plzIds = []
-		def Map postleitzahlen = [:]
-		def Map orte = [:]
-		def entryPlz = params.find{ k, v -> Postleitzahl.metaClass.hasMetaProperty k }
-		if( entryPlz ) {
-		  if (entryPlz.key == 'ort')
-			Postleitzahl.withCriteria() { like (entryPlz.key, "${entryPlz.value}%") }.each {
-				if(hatStrVerz (it.id)) { 
-					plzIds << it.id
-					postleitzahlen[it.id] = it.plz
-					orte[it.id] = it.ort
-				}
-				else {
-					StrPlzOrt strPlzOrt = new StrPlzOrt()
-					strPlzOrt.postleitzahl = it.plz
-					strPlzOrt.ort = it.ort
-					strPlzOrte << strPlzOrt
-				}
-			}
-		}
-		else
-		  render text:'plz not found!'
-		def str = params["strasse"]
-		String s = "from Strasse as s where s.strasse like '${str}%' and s.plz in ${plzIds}"
-		s = s.replace('[', '(')
-		s = s.replace(']', ')')
-		def strassen = Strasse.findAll (s)
-		
-		strassen.each {
+		def List<StrPlzOrt> strPlzOrte = []
+		Sucher.getMatches(params).each {Sucher s ->
 			StrPlzOrt strPlzOrt = new StrPlzOrt()
-			strPlzOrt.strasse = it.strasse
-			strPlzOrt.hnrVon = it.hnrVon
-			strPlzOrt.zusVon = it.zusVon
-			strPlzOrt.hnrBis = it.hnrBis
-			strPlzOrt.zusBis = it.zusBis
-			strPlzOrt.postleitzahl = postleitzahlen[it.plz.id]
-			strPlzOrt.ort = orte[it.plz.id]
+			strPlzOrt.strasse = s.strasse
+			strPlzOrt.hnrVon = s.hnrVon
+			strPlzOrt.zusVon = s.zusVon
+			strPlzOrt.hnrBis = s.hnrBis
+			strPlzOrt.zusBis = s.zusBis
+			strPlzOrt.postleitzahl = s.postleitzahl.toString().padLeft(5, "0")
+			strPlzOrt.ort = s.ort
 			strPlzOrte << strPlzOrt
 		}
-		render (strPlzOrte as JSON) 
+		render (strPlzOrte as JSON)
 	}
 	
-	private Boolean hatStrVerz (Long plzId) {
-		String s = "from Strasse as s where s.plz.id = ${plzId}"
-		def strassen = Strasse.findAll(s)
-		!strassen.empty
+	//localhost:8080/Plz/WebService/getGrEmpf?ort=Dortmund&grossempfaenger=AOK
+	def getGrEmpf(){
+		def List<PlzOrtGrEmpf> plzOrtGrEmpfer = []
+		SucherGrosskunde.getMatches(params).each {SucherGrosskunde s ->
+			PlzOrtGrEmpf plzOrtGrEmpf = new PlzOrtGrEmpf()
+			plzOrtGrEmpf.postleitzahl = s.postleitzahl.toString().padLeft(5, "0")
+			plzOrtGrEmpf.ort = s.ort
+			plzOrtGrEmpf.grossempfaenger = s.grosskunde
+			plzOrtGrEmpfer << plzOrtGrEmpf
+		}
+		render (plzOrtGrEmpfer as JSON)
 	}
+		
 }
 
 
