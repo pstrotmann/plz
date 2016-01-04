@@ -38,7 +38,7 @@
 				<g:each in="${postleitzahlInstanceList}" status="i" var="postleitzahlInstance">
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
 					
-						<td><g:link action="show" id="${postleitzahlInstance.id}">${fieldValue(bean: postleitzahlInstance, field: "plz")}</g:link></td>
+						<td><g:link action="show" id="${postleitzahlInstance.id}">${fieldValue(bean: postleitzahlInstance, field: "plz5")}</g:link></td>
 					
 						<td>${fieldValue(bean: postleitzahlInstance, field: "osmId")}</td>
 					

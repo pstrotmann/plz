@@ -33,7 +33,7 @@
 				<g:each in="${sucherGrosskundeInstanceList}" status="i" var="sucherGrosskundeInstance">
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
 					
-						<td>${fieldValue(bean: sucherGrosskundeInstance, field: "postleitzahl")}</td>
+						<td>${fieldValue(bean: sucherGrosskundeInstance, field: "plz5")}</td>
 						
 						<td>${fieldValue(bean: sucherGrosskundeInstance, field: "ort")}</td>
 						

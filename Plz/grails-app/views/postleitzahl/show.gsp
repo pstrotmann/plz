@@ -27,7 +27,7 @@
 				<li class="fieldcontain">
 					<span id="plz-label" class="property-label"><g:message code="postleitzahl.plz.label" default="Plz" /></span>
 					
-						<span class="property-value" aria-labelledby="plz-label"><g:fieldValue bean="${postleitzahlInstance}" field="plz"/></span>
+						<span class="property-value" aria-labelledby="plz-label"><g:fieldValue bean="${postleitzahlInstance}" field="plz5"/></span>
 					
 				</li>
 				</g:if>

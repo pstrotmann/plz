@@ -142,4 +142,8 @@ class Sucher {
 		!strassen.empty
 	}
 	
+	String getPlz5(){
+		postleitzahl.toString().padLeft(5, "0")
+	}
+	
 }

@@ -26,7 +26,7 @@ class Postleitzahl {
 		plz column: "plz", index: "plz"
 	}
 	
-	String toString() {"${this.plz}  ${this.ort}" }
+	String toString() {"${this.plz5}  ${this.ort}" }
 	
 	static List getBundeslandIds () {
 		List l = []
@@ -47,5 +47,9 @@ class Postleitzahl {
 	
 	String getBundeslandKlar () {
 		Holders.config.bundesland[bundesland]
+	}
+	
+	String getPlz5(){
+		plz.toString().padLeft(5, "0")
 	}
 }

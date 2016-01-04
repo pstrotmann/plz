@@ -101,4 +101,8 @@ class SucherGrosskunde {
 		}
 		sList.sort{SucherGrosskunde gk -> gk.plz}
 	}
+	
+	String getPlz5(){
+		postleitzahl.toString().padLeft(5, "0")
+	}
 }
