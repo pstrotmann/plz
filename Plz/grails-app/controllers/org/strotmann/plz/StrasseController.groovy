@@ -12,7 +12,7 @@ class StrasseController {
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Strasse.list(params), model:[strasseInstanceCount: Strasse.count()]
+        respond StrFilter.getMatchesPlz(params)
     }
 
     def show(Strasse strasseInstance) {

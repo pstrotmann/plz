@@ -9,8 +9,8 @@ class PostleitzahlController {
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 	
    def index(Integer max) {
-        //params.max = Math.min(max ?: 10, 100)
-        respond Postleitzahl.list(params), model:[postleitzahlInstanceCount: Postleitzahl.count()]
+	   //params.max = Math.min(max ?: 10, 100)
+       respond PlzFilter.getMatchesOrt(params)
     }
 
     def show(Postleitzahl postleitzahlInstance) {

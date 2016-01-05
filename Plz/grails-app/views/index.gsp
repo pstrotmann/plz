@@ -100,8 +100,8 @@
 					</ul>
 					<h3><g:message code="app.title1" default="Verwaltung"/></h3>
 					<ul>
-						<li class="controller"><g:link controller="postleitzahl">Postleitzahl</g:link></li>
-						<li class="controller"><g:link controller="strasse">Strasse</g:link></li>
+						<li class="controller"><g:link controller="plzFilter">Postleitzahl</g:link></li>
+						<li class="controller"><g:link controller="strFilter">Strasse</g:link></li>
 					</ul>
 					
 				</ul>
