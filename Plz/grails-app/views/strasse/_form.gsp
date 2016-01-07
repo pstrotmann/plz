@@ -16,16 +16,7 @@
 		<g:message code="strasse.hnrVon.label" default="Hnr Von" />
 		
 	</label>
-	<g:field name="hnrVon" type="number" value="${strasseInstance.hnrVon}"/>
-
-</div>
-
-<div class="fieldcontain ${hasErrors(bean: strasseInstance, field: 'zusVon', 'error')} ">
-	<label for="zusVon">
-		<g:message code="strasse.zusVon.label" default="Zus Von" />
-		
-	</label>
-	<g:textField name="zusVon" value="${strasseInstance?.zusVon}"/>
+	<g:textField name="hausnrVon" value="${strasseInstance.hausNrVon}"/>
 
 </div>
 
@@ -34,16 +25,7 @@
 		<g:message code="strasse.hnrBis.label" default="Hnr Bis" />
 		
 	</label>
-	<g:field name="hnrBis" type="number" value="${strasseInstance.hnrBis}"/>
-
-</div>
-
-<div class="fieldcontain ${hasErrors(bean: strasseInstance, field: 'zusBis', 'error')} ">
-	<label for="zusBis">
-		<g:message code="strasse.zusBis.label" default="Zus Bis" />
-		
-	</label>
-	<g:textField name="zusBis" value="${strasseInstance?.zusBis}"/>
+	<g:textField name="hausnrBis" value="${strasseInstance.hausNrBis}"/>
 
 </div>
 
@@ -52,7 +34,7 @@
 		<g:message code="strasse.plz.label" default="Plz" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:select id="plz" name="plz.id" from="${org.strotmann.plz.Postleitzahl.sortiertNachPlz}" optionKey="id" required="" value="${strasseInstance?.plz?.id}" class="many-to-one"/>
+	<g:select id="plz" name="plz.plz" from="${org.strotmann.plz.Postleitzahl.sortiertNachPlz}" optionKey="id" required="" value="${strasseInstance?.plz}" class="many-to-one"/>
 
 </div>
 

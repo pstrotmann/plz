@@ -14,7 +14,7 @@ class StrFilter {
 	static List getMatchesPlz(Map params) {
 		Integer hPlz = params.plz.toInteger()
 		def query = Strasse.where {
-			plz.plz == hPlz 
+			postleitzahl == hPlz 
 		}
 		query.findAll()
 	}

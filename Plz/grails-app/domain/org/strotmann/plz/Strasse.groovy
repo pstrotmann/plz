@@ -3,18 +3,21 @@ package org.strotmann.plz
 class Strasse {
 	
 	String strasse
-	Integer hnrVon
-	String zusVon
-	Integer hnrBis
-	String zusBis
-	Postleitzahl plz
+	Integer postleitzahl
+	String hausNrVon
+	String hausNrBis
 
     static constraints = {
-		strasse(unique:['plz','strasse','hnrVon','zusVon'])
-		hnrVon(nullable:true)
-		zusVon(nullable:true)
-		hnrBis(nullable:true)
-		zusBis(nullable:true)
-		plz()
+		strasse(unique:['postleitzahl','strasse','hausNrVon'])
+		postleitzahl()
+		hausNrVon(nullable:true)
+		hausNrBis(nullable:true)
 	}
+	
+	static mapping = {
+		strasse column: "strasse", index: "strasse"
+		postleitzahl column: "postleitzahl", index: "postleitzahl"
+	}
+	
+	String toString() {"${postleitzahl} ${strasse} ${hausNrVon} ${hausNrBis}" }
 }

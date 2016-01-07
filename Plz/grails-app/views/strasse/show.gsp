@@ -32,38 +32,20 @@
 				</li>
 				</g:if>
 			
-				<g:if test="${strasseInstance?.hnrVon}">
+				<g:if test="${strasseInstance?.hausnrVon}">
 				<li class="fieldcontain">
-					<span id="hnrVon-label" class="property-label"><g:message code="strasse.hnrVon.label" default="Hnr Von" /></span>
+					<span id="hnrVon-label" class="property-label"><g:message code="strasse.hnrVon.label" default="Hausnr Von" /></span>
 					
-						<span class="property-value" aria-labelledby="hnrVon-label"><g:fieldValue bean="${strasseInstance}" field="hnrVon"/></span>
+						<span class="property-value" aria-labelledby="hnrVon-label"><g:fieldValue bean="${strasseInstance}" field="hausNrVon"/></span>
 					
 				</li>
 				</g:if>
 			
-				<g:if test="${strasseInstance?.zusVon}">
+				<g:if test="${strasseInstance?.hausnrBis}">
 				<li class="fieldcontain">
-					<span id="zusVon-label" class="property-label"><g:message code="strasse.zusVon.label" default="Zus Von" /></span>
+					<span id="hnrBis-label" class="property-label"><g:message code="strasse.hnrBis.label" default="Hausnr Bis" /></span>
 					
-						<span class="property-value" aria-labelledby="zusVon-label"><g:fieldValue bean="${strasseInstance}" field="zusVon"/></span>
-					
-				</li>
-				</g:if>
-			
-				<g:if test="${strasseInstance?.hnrBis}">
-				<li class="fieldcontain">
-					<span id="hnrBis-label" class="property-label"><g:message code="strasse.hnrBis.label" default="Hnr Bis" /></span>
-					
-						<span class="property-value" aria-labelledby="hnrBis-label"><g:fieldValue bean="${strasseInstance}" field="hnrBis"/></span>
-					
-				</li>
-				</g:if>
-			
-				<g:if test="${strasseInstance?.zusBis}">
-				<li class="fieldcontain">
-					<span id="zusBis-label" class="property-label"><g:message code="strasse.zusBis.label" default="Zus Bis" /></span>
-					
-						<span class="property-value" aria-labelledby="zusBis-label"><g:fieldValue bean="${strasseInstance}" field="zusBis"/></span>
+						<span class="property-value" aria-labelledby="hnrBis-label"><g:fieldValue bean="${strasseInstance}" field="hausNrBis"/></span>
 					
 				</li>
 				</g:if>
@@ -72,7 +54,7 @@
 				<li class="fieldcontain">
 					<span id="plz-label" class="property-label"><g:message code="strasse.plz.label" default="Plz" /></span>
 					
-						<span class="property-value" aria-labelledby="plz-label"><g:link controller="postleitzahl" action="show" id="${strasseInstance?.plz?.id}">${strasseInstance?.plz?.encodeAsHTML()}</g:link></span>
+						<span class="property-value" aria-labelledby="plz-label"><g:fieldValue bean="${strasseInstance}" field="postleitzahl"/></span>
 					
 				</li>
 				</g:if>

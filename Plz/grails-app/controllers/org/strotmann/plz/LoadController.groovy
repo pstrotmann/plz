@@ -76,7 +76,6 @@ class LoadController {
 		if (hnr.contains('-')) {
 			n = hnr.split("-")[0]
 			a = "-"+hnr.split("-")[1]
-			println "hnr=${hnr},n=${n},a=${a}"
 		}
 		else
 		for (Integer i = 0; i < hnr.length(); i++) {

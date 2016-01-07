@@ -66,7 +66,7 @@ class Sucher {
 			plz == hPlz && grosskunde == null
 		}
 		query.findAll().each {Postleitzahl p ->
-			String q = "from Strasse as s where s.plz.id = ${p.id}"
+			String q = "from Strasse as s where s.postleitzahl = ${p.plz}"
 			def strassen = Strasse.findAll(q)
 			if (strassen.empty) {
 				Sucher s = new Sucher()
@@ -79,10 +79,10 @@ class Sucher {
 				s.postleitzahl = p.plz
 				s.ort = p.ort
 				s.strasse = str.strasse
-				s.hnrVon = str.hnrVon
-				s.hnrBis = str.hnrBis
-				s.zusVon = str.zusVon
-				s.zusBis = str.zusBis
+				s.hnrVon = hnrN(str.hausNrVon)
+				s.hnrBis = hnrN(str.hausNrBis)
+				s.zusVon = hnrA(str.hausNrVon)
+				s.zusBis = hnrA(str.hausNrBis)
 				sList << s
 			}
 		}
@@ -97,7 +97,7 @@ class Sucher {
 			ort =~ hOrt && grosskunde == null
 		}
 		query.findAll().each {Postleitzahl p ->
-			String q = "from Strasse as s where s.plz.id = ${p.id}"
+			String q = "from Strasse as s where s.postleitzahl = ${p.plz}"
 			def strassen = Strasse.findAll(q)
 			if (!strassen.empty) {
 				
@@ -107,10 +107,10 @@ class Sucher {
 						s.postleitzahl = p.plz
 						s.ort = p.ort
 						s.strasse = str.strasse
-						s.hnrVon = str.hnrVon
-						s.hnrBis = str.hnrBis
-						s.zusVon = str.zusVon
-						s.zusBis = str.zusBis
+						s.hnrVon = hnrN(str.hausNrVon)
+						s.hnrBis = hnrN(str.hausNrBis)
+						s.zusVon = hnrA(str.hausNrVon)
+						s.zusBis = hnrA(str.hausNrBis)
 						sList << s
 					}
 				}
@@ -137,13 +137,35 @@ class Sucher {
 	}
 	
 	Boolean getMitStrassen () {
-		String q = "from Strasse as s where s.plz.plz = ${postleitzahl}"
+		String q = "from Strasse as s where s.postleitzahl = ${postleitzahl}"
 		def strassen = Strasse.findAll(q)
 		!strassen.empty
 	}
 	
 	String getPlz5(){
 		postleitzahl.toString().padLeft(5, "0")
+	}
+	
+	static Integer hnrN (String hnr) {
+		if (!hnr) return null
+		def String n = ''
+		for (Integer i = 0; i < hnr.length(); i++) {
+			String s = hnr.trim().substring(i, i+1)
+			if (s.isNumber())
+				n += s
+		}
+		n.toInteger()
+	}
+	
+	static String hnrA (String hnr) {
+		if (!hnr) return null
+		def String a = ''
+		for (Integer i = 0; i < hnr.length(); i++) {
+			String s = hnr.trim().substring(i, i+1)
+			if (!s.isNumber())
+				a += s
+		}
+		a
 	}
 	
 }

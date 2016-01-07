@@ -24,6 +24,7 @@ class Postleitzahl {
 	
 	static mapping = {
 		plz column: "plz", index: "plz"
+		ort column: "ort", index: "ort"
 	}
 	
 	String toString() {"${this.plz5}  ${this.ort}" }
