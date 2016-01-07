@@ -8,6 +8,89 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem
 class LoadController {
 	
 	def index() {
+		render ("AdressTabelle wird aus OSM geladen")
+		FileInputStream osmStream = new FileInputStream ("/vol/map.osm");
+		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
+		BufferedReader osm = new BufferedReader (osmReader)
+		Integer cntRead = 0
+		Integer cntLoad = 0
+		Integer cntAdr = 0
+		List adrL
+		Boolean lActive = false
+		osm.eachLine {String it ->
+			cntRead++
+			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
+				if (lActive && (adrL != [null,null,null,null]))
+					println "Verschachtelung bei it=${it}"
+				else {
+					adrL = [null,null,null,null]
+					lActive = true
+				}
+			}
+			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
+				if (adrL[0] && adrL[2] && adrL[3]) {
+					def Adresse adresse = new Adresse()
+					adresse.ort = adrL[0]
+					adresse.hnr = adrL[1]
+					adresse.plz = adrL[2]
+					adresse.str = adrL[3]
+					println adresse
+					if (adresse.save(flush:true))
+						cntLoad++
+					else
+						adresse.errors.each {
+							println it
+						}
+				}
+					
+				lActive = false
+			}
+			if (it.contains("<tag") && tagK(it) == "addr:city") {
+				cntAdr++
+				adrL[0] = tagV(it)
+			}
+			if (it.contains("<tag") && tagK(it) == "addr:housenumber")  
+				adrL[1] = hnrPad(tagV(it))
+			if (it.contains("<tag") && tagK(it) == "addr:postcode") 
+				adrL[2] = tagV(it).toInteger()
+			if (it.contains("<tag") && tagK(it) == "addr:street") 
+				adrL[3] = tagV(it)
+		}
+		render (" Adress Tabelle wurde aus OSM geladen, ${cntRead} Zeilen gelesen, ${cntAdr} Adressen gefunden, ${cntLoad} Adressen geladen")
+	}
+			
+	String tagK (String tag) {
+		Integer anfKey = tag.trim().indexOf("k=") + 3
+		Integer endKey = tag.trim().indexOf('"', anfKey) 
+		tag.trim().substring(anfKey, endKey)
+	}
+	String tagV (String tag) {
+		Integer anfKey = tag.trim().indexOf("v=") + 3
+		Integer endKey = tag.trim().indexOf('"', anfKey)
+		tag.trim().substring(anfKey, endKey)
+	}
+	
+	String hnrPad (String hnr) {
+		def String n = ''
+		def String a = ''
+		if (hnr.contains('-')) {
+			n = hnr.split("-")[0]
+			a = "-"+hnr.split("-")[1]
+			println "hnr=${hnr},n=${n},a=${a}"
+		}
+		else
+		for (Integer i = 0; i < hnr.length(); i++) {
+			String s = hnr.substring(i, i+1)
+			if (s.isNumber())
+				n += s
+			else
+				a += s
+		}
+		n = n.padLeft(4,'0') + a
+		n
+	}
+	
+	def ladePlzKoeln() {
 		render ("Straßen Tabelle wird aus ExcelDatei geladen")
 		// öffnen ExcelDatei
 		POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/vol/strassenKöln.xls"));
