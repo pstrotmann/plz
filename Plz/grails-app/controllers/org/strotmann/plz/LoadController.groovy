@@ -15,16 +15,16 @@ class LoadController {
 		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
 		BufferedReader osm = new BufferedReader (osmReader)
 		Map nodeMap = [:]
-		Integer cntNode = 0
+		Integer cntNodeMap = 0
 		osm.eachLine {String it ->
-			cntNode++
+			cntNodeMap++
 			if (it.trim().startsWith("<node")) {
 				BigInteger nodeId = tagVal(it,'id').toBigInteger()
-				nodeMap += [nodeId:[tagVal(it,'lat').toBigDecimal(),tagVal(it,'lon').toBigDecimal()]]
+				nodeMap[nodeId] = [tagVal(it,'lat').toBigDecimal(),tagVal(it,'lon').toBigDecimal()]
 			}
 		}
 		osm.close()
-		println "cntNode=${cntNode}"
+		println "cntNode=${cntNodeMap}"
 		//Adressen aufbauen
 		osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
 		osmReader = new InputStreamReader(osmStream, "UTF-8")
@@ -34,13 +34,13 @@ class LoadController {
 		Integer cntAdr = 0
 		List adrL
 		List <PlzNode> nodeList = []
-		
 		String nodeActive = ""
-		String refActive = ""
+		BigInteger refActive = 0
 		Boolean lActive = false
 		osm.eachLine {String it ->
 			cntRead++
-			
+			if (it.trim().startsWith("<nd"))
+				refActive = tagVal(it, "ref").toBigInteger()
 			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
 				adrL = [null,null,null,null]
 				lActive = true
@@ -52,7 +52,7 @@ class LoadController {
 					Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
 					adrL[0] = plz.ort
 				}
-				if (adrL[0] && adrL[2] && adrL[3]) {
+				if (adrL[0] && adrL[1] && adrL[2] && adrL[3]) {
 					cntAdr++
 					def Adresse adresse = new Adresse()
 					adresse.ort = adrL[0]
@@ -60,18 +60,24 @@ class LoadController {
 					adresse.plz = adrL[2]
 					adresse.str = adrL[3]
 					
+					PlzNode plzNode = new PlzNode()
+					plzNode.plz = adresse.plz
+					plzNode.ort = adresse.ort
+					
 					if (it.trim().startsWith("</node")) {
-						PlzNode plzNode = new PlzNode()
-						plzNode.plz = adresse.plz
-						plzNode.ort = adresse.ort
 						plzNode.lat = tagVal(nodeActive, "lat").toBigDecimal()
 						plzNode.lon = tagVal(nodeActive, "lon").toBigDecimal()
 						nodeActive = ""
-						nodeList << plzNode
 					}
-					else {
-						
+					else {//</way
+						List punkt = nodeMap[refActive]
+						plzNode.lat = punkt[0]
+						plzNode.lon = punkt[1]
+						refActive = 0
 					}
+					
+					nodeList << plzNode
+					
 //					if (adresse.save())
 //						cntLoad++
 //						else
@@ -94,6 +100,7 @@ class LoadController {
 		def hibSession = sessionFactory.getCurrentSession()
 		assert hibSession != null
 		hibSession.flush()
+		println "nodeList enthält: ${nodeList.size()}"
 		render (" Adress Tabelle wurde aus OSM geladen, ${cntRead} Zeilen gelesen, ${cntAdr} Adressen gefunden, ${cntLoad} Adressen geladen")
 	}
 
