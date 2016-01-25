@@ -4,70 +4,103 @@ import org.apache.poi.hssf.usermodel.HSSFRow
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
+import org.hibernate.SessionFactory;
 
 class LoadController {
-	
+	SessionFactory sessionFactory
 	def index() {
 		render ("AdressTabelle wird aus OSM geladen")
-		FileInputStream osmStream = new FileInputStream ("/vol/map.osm");
+		//nodeMap aufbauen
+		FileInputStream osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
 		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
 		BufferedReader osm = new BufferedReader (osmReader)
+		Map nodeMap = [:]
+		Integer cntNode = 0
+		osm.eachLine {String it ->
+			cntNode++
+			if (it.trim().startsWith("<node")) {
+				BigInteger nodeId = tagVal(it,'id').toBigInteger()
+				nodeMap += [nodeId:[tagVal(it,'lat').toBigDecimal(),tagVal(it,'lon').toBigDecimal()]]
+			}
+		}
+		osm.close()
+		println "cntNode=${cntNode}"
+		//Adressen aufbauen
+		osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
+		osmReader = new InputStreamReader(osmStream, "UTF-8")
+		osm = new BufferedReader (osmReader)
 		Integer cntRead = 0
 		Integer cntLoad = 0
 		Integer cntAdr = 0
 		List adrL
+		List <PlzNode> nodeList = []
+		
+		String nodeActive = ""
+		String refActive = ""
 		Boolean lActive = false
 		osm.eachLine {String it ->
 			cntRead++
+			
 			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
-				if (lActive && (adrL != [null,null,null,null]))
-					println "Verschachtelung bei it=${it}"
-				else {
-					adrL = [null,null,null,null]
-					lActive = true
-				}
+				adrL = [null,null,null,null]
+				lActive = true
+				if (it.trim().startsWith("<node"))
+					nodeActive = it
 			}
 			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
+				if (!adrL[0] && adrL[2]){
+					Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
+					adrL[0] = plz.ort
+				}
 				if (adrL[0] && adrL[2] && adrL[3]) {
+					cntAdr++
 					def Adresse adresse = new Adresse()
 					adresse.ort = adrL[0]
 					adresse.hnr = adrL[1]
 					adresse.plz = adrL[2]
 					adresse.str = adrL[3]
-					println adresse
-					if (adresse.save(flush:true))
-						cntLoad++
-					else
-						adresse.errors.each {
-							println it
-						}
-				}
 					
+					if (it.trim().startsWith("</node")) {
+						PlzNode plzNode = new PlzNode()
+						plzNode.plz = adresse.plz
+						plzNode.ort = adresse.ort
+						plzNode.lat = tagVal(nodeActive, "lat").toBigDecimal()
+						plzNode.lon = tagVal(nodeActive, "lon").toBigDecimal()
+						nodeActive = ""
+						nodeList << plzNode
+					}
+					else {
+						
+					}
+//					if (adresse.save())
+//						cntLoad++
+//						else
+//							adresse.errors.each {
+//							println it
+//						}
+				}
+									
 				lActive = false
 			}
-			if (it.contains("<tag") && tagK(it) == "addr:city") {
-				cntAdr++
-				adrL[0] = tagV(it)
-			}
-			if (it.contains("<tag") && tagK(it) == "addr:housenumber")  
-				adrL[1] = hnrPad(tagV(it))
-			if (it.contains("<tag") && tagK(it) == "addr:postcode") 
-				adrL[2] = tagV(it).toInteger()
-			if (it.contains("<tag") && tagK(it) == "addr:street") 
-				adrL[3] = tagV(it)
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:city") 
+				adrL[0] = tagVal(it,'v')
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber")  
+				adrL[1] = hnrPad(tagVal(it,'v'))
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:postcode") 
+				adrL[2] = tagVal(it,'v').toInteger()
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:street") 
+				adrL[3] = tagVal(it,'v')
 		}
+		def hibSession = sessionFactory.getCurrentSession()
+		assert hibSession != null
+		hibSession.flush()
 		render (" Adress Tabelle wurde aus OSM geladen, ${cntRead} Zeilen gelesen, ${cntAdr} Adressen gefunden, ${cntLoad} Adressen geladen")
 	}
-			
-	String tagK (String tag) {
-		Integer anfKey = tag.trim().indexOf("k=") + 3
-		Integer endKey = tag.trim().indexOf('"', anfKey) 
-		tag.trim().substring(anfKey, endKey)
-	}
-	String tagV (String tag) {
-		Integer anfKey = tag.trim().indexOf("v=") + 3
-		Integer endKey = tag.trim().indexOf('"', anfKey)
-		tag.trim().substring(anfKey, endKey)
+
+	String tagVal (String line, String x) {
+		Integer anfKey = line.trim().indexOf("${x}=") + x.length() + 2
+		Integer endKey = line.trim().indexOf('"', anfKey)
+		line.trim().substring(anfKey, endKey)
 	}
 	
 	String hnrPad (String hnr) {
