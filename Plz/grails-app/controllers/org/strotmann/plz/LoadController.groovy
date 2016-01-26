@@ -1,5 +1,7 @@
 package org.strotmann.plz
 
+import java.util.List;
+
 import org.apache.poi.hssf.usermodel.HSSFRow
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
@@ -25,7 +27,7 @@ class LoadController {
 		}
 		osm.close()
 		println "cntNode=${cntNodeMap}"
-		//Adressen aufbauen
+		//sichere Adressen aufbauen
 		osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
 		osmReader = new InputStreamReader(osmStream, "UTF-8")
 		osm = new BufferedReader (osmReader)
@@ -78,12 +80,12 @@ class LoadController {
 					
 					nodeList << plzNode
 					
-//					if (adresse.save())
-//						cntLoad++
-//						else
-//							adresse.errors.each {
-//							println it
-//						}
+					if (adresse.save())
+						cntLoad++
+						else
+							adresse.errors.each {
+							println it
+						}
 				}
 									
 				lActive = false
@@ -101,6 +103,76 @@ class LoadController {
 		assert hibSession != null
 		hibSession.flush()
 		println "nodeList enthält: ${nodeList.size()}"
+		
+		//hergeleitete Adressen aufbauen
+		println "Start Herleitung"
+		osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
+		osmReader = new InputStreamReader(osmStream, "UTF-8")
+		osm = new BufferedReader (osmReader)
+		nodeActive = ""
+		refActive = 0
+		lActive = false
+		Integer cntAdrHerl = 0
+		osm.eachLine {String it ->
+			if (it.trim().startsWith("<nd"))
+				refActive = tagVal(it, "ref").toBigInteger()
+			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
+				adrL = [null,null,null,null]
+				lActive = true
+				if (it.trim().startsWith("<node"))
+					nodeActive = it
+			}
+			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
+				if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
+					if (!adrL[0] && adrL[2]){
+						Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
+						adrL[0] = plz.ort
+					}
+				}
+				if (!adrL[0] && adrL[1] && !adrL[2] && adrL[3]) {
+					
+					cntAdr++
+					cntAdrHerl++
+					def Adresse adresse = new Adresse()
+					
+					List punkt
+					if (it.trim().startsWith("</node")) {
+						punkt = [tagVal(nodeActive, "lat").toBigDecimal(),tagVal(nodeActive, "lon").toBigDecimal()]
+						nodeActive = ""
+					}
+					else {//</way
+						punkt = nodeMap[refActive]
+						refActive = 0
+					}
+					//jetzt aus nodeList den nächsten Punkt heraussuchen
+					//ort und plz durch Nachbarschaft ermitteln
+					PlzNode plzNode = PlzNode.nearestPlzNode(nodeList, punkt)
+					adresse.ort = plzNode.ort
+					adresse.plz = plzNode.plz
+					adresse.hnr = adrL[1]
+					adresse.str = adrL[3]
+					if (adresse.save())
+						cntLoad++
+						else
+							adresse.errors.each {
+							println it
+						}
+					}
+					lActive = false
+				
+			}
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:city")
+				adrL[0] = tagVal(it,'v')
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber")
+				adrL[1] = hnrPad(tagVal(it,'v'))
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:postcode")
+				adrL[2] = tagVal(it,'v').toInteger()
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:street")
+				adrL[3] = tagVal(it,'v')
+		}
+		println "hergeleitete Adressen:${cntAdrHerl}"
+		hibSession.flush()
+		
 		render (" Adress Tabelle wurde aus OSM geladen, ${cntRead} Zeilen gelesen, ${cntAdr} Adressen gefunden, ${cntLoad} Adressen geladen")
 	}
 
