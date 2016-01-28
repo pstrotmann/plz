@@ -7,20 +7,60 @@ import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.hibernate.SessionFactory;
+import java.util.calendar.*
 
 class LoadController {
 	SessionFactory sessionFactory
+	
 	def index() {
+		render ("keine Funktion")
+	}
+	def load() {
+		render ("AdressTabelle wird zu Strassen verdichtet")
+		def List strList = Adresse.strassen
+		def cntStr = 0, cntLoad = 0
+		strList.each {
+			cntStr++
+			Strasse strasse = new Strasse()
+			strasse.postleitzahl = it[1].toInteger()
+			strasse.strasse = it[2]
+			strasse.hausNrVon = it[3] 
+			strasse.hausNrBis = it[4]
+			if (strasse.save())
+				cntLoad++
+				else
+					strasse.errors.each {
+					println it
+				}
+			}
+		def hibSession = sessionFactory.getCurrentSession()
+		assert hibSession != null
+		hibSession.flush()
+		render ("------AdressTabelle wurde zu ${cntStr} Strassen verdichtet, ${cntLoad} in Strassentabelle geladen ")
+	}
+	def preload() {
 		render ("AdressTabelle wird aus OSM geladen")
+		def hibSession = sessionFactory.getCurrentSession()
+		assert hibSession != null
+		def BigDecimal minlat, maxlat, minlon, maxlon
 		//nodeMap aufbauen
-		FileInputStream osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
+		FileInputStream osmStream = new FileInputStream ("/vol/mapDortmund");
 		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
 		BufferedReader osm = new BufferedReader (osmReader)
 		Map nodeMap = [:]
 		Integer cntNodeMap = 0
 		osm.eachLine {String it ->
-			cntNodeMap++
+			if (it.trim().startsWith("<bounds")) {
+				minlat = tagVal(it, "minlat").toBigDecimal()
+				maxlat = tagVal(it, "maxlat").toBigDecimal()
+				minlon = tagVal(it, "minlon").toBigDecimal()
+				maxlon = tagVal(it, "maxlon").toBigDecimal()
+				println it 
+			}
+			if (cntNodeMap %10000 == 00)
+				println "${cntNodeMap} nodes geladen"
 			if (it.trim().startsWith("<node")) {
+				cntNodeMap++
 				BigInteger nodeId = tagVal(it,'id').toBigInteger()
 				nodeMap[nodeId] = [tagVal(it,'lat').toBigDecimal(),tagVal(it,'lon').toBigDecimal()]
 			}
@@ -28,14 +68,16 @@ class LoadController {
 		osm.close()
 		println "cntNode=${cntNodeMap}"
 		//sichere Adressen aufbauen
-		osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
+		osmStream = new FileInputStream ("/vol/mapDortmund");
 		osmReader = new InputStreamReader(osmStream, "UTF-8")
 		osm = new BufferedReader (osmReader)
 		Integer cntRead = 0
 		Integer cntLoad = 0
 		Integer cntAdr = 0
+		Integer cntDup = 0
 		List adrL
-		List <PlzNode> nodeList = []
+		List <PlzNode> nodeList
+		Map plzNodeMap = [:]
 		String nodeActive = ""
 		BigInteger refActive = 0
 		Boolean lActive = false
@@ -77,17 +119,26 @@ class LoadController {
 						plzNode.lon = punkt[1]
 						refActive = 0
 					}
-					
+					String mapKey = plzNodeKey (minlat,maxlat,minlon,maxlon,plzNode.lat,plzNode.lon)
+					println "plzNode.lat=${plzNode.lat}"
+					println "plzNode.lon=${plzNode.lon}"
+					println "mapKey=${mapKey}"
+					if (plzNodeMap[mapKey]) 
+						nodeList = plzNodeMap[mapKey]
+					else
+						nodeList = []
 					nodeList << plzNode
+					plzNodeMap[mapKey] = nodeList
 					
-					if (adresse.save())
-						cntLoad++
-						else
-							adresse.errors.each {
-							println it
-						}
+//					if (adresse.save())
+//							cntLoad++
+//						else
+//							cntDup++
 				}
-									
+//				if (cntLoad %500 == 00) {
+//					//hibSession.flush()
+//					println "${cntAdr} sichere Adressen geladen, Duplikate nicht geladen: ${cntDup}"
+//				}
 				lActive = false
 			}
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:city") 
@@ -99,18 +150,18 @@ class LoadController {
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:street") 
 				adrL[3] = tagVal(it,'v')
 		}
-		def hibSession = sessionFactory.getCurrentSession()
-		assert hibSession != null
-		hibSession.flush()
-		println "nodeList enthält: ${nodeList.size()}"
+		
+		
+		println "plzNodeMap 96 enthält: ${plzNodeMap['96'].size()}"
 		
 		//hergeleitete Adressen aufbauen
 		println "Start Herleitung"
-		osmStream = new FileInputStream ("/vol/mapDattelnWaltrop");
+		osmStream = new FileInputStream ("/vol/mapDortmund");
 		osmReader = new InputStreamReader(osmStream, "UTF-8")
 		osm = new BufferedReader (osmReader)
 		nodeActive = ""
 		refActive = 0
+		cntDup = 0
 		lActive = false
 		Integer cntAdrHerl = 0
 		osm.eachLine {String it ->
@@ -135,7 +186,7 @@ class LoadController {
 					cntAdrHerl++
 					def Adresse adresse = new Adresse()
 					
-					List punkt
+					List <BigDecimal> punkt
 					if (it.trim().startsWith("</node")) {
 						punkt = [tagVal(nodeActive, "lat").toBigDecimal(),tagVal(nodeActive, "lon").toBigDecimal()]
 						nodeActive = ""
@@ -146,19 +197,32 @@ class LoadController {
 					}
 					//jetzt aus nodeList den nächsten Punkt heraussuchen
 					//ort und plz durch Nachbarschaft ermitteln
+					BigDecimal bigDec0 = punkt[0]
+					BigDecimal bigDec1 = punkt[1]
+					String mapKey = plzNodeKey (minlat,maxlat,minlon,maxlon,bigDec0,bigDec1)
+					if (plzNodeMap[mapKey]) 
+						nodeList = plzNodeMap[mapKey]
+					else
+						nodeList = [] 
+					if (cntAdrHerl %100 == 0)
+						println "vor  near time=${Calendar.instance.time}"
 					PlzNode plzNode = PlzNode.nearestPlzNode(nodeList, punkt)
+					if (cntAdrHerl %100 == 0)
+						println "nach near time=${Calendar.instance.time}"
 					adresse.ort = plzNode.ort
 					adresse.plz = plzNode.plz
 					adresse.hnr = adrL[1]
 					adresse.str = adrL[3]
 					if (adresse.save())
-						cntLoad++
+							cntLoad++
 						else
-							adresse.errors.each {
-							println it
-						}
-					}
-					lActive = false
+							cntDup++
+				}
+				if (cntAdrHerl %5 == 00) {
+					//hibSession.flush()
+					println "${cntAdrHerl} hergeleitete Adressen geladen, Duplikate nicht geladen: ${cntDup}"
+				}
+				lActive = false
 				
 			}
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:city")
@@ -199,6 +263,15 @@ class LoadController {
 		}
 		n = n.padLeft(4,'0') + a
 		n
+	}
+	
+	String plzNodeKey (BigDecimal minlat, BigDecimal maxlat, BigDecimal minlon, BigDecimal maxlon, BigDecimal lat, BigDecimal lon) {
+  		String nodeKey = ""
+		String latPart = (((lat - minlat)/(maxlat - minlat))*10).intValue().toString()
+		nodeKey += latPart
+		String lonPart = (((lon - minlon)/(maxlon - minlon))*10).intValue().toString()
+		nodeKey += lonPart
+		nodeKey
 	}
 	
 	def ladePlzKoeln() {

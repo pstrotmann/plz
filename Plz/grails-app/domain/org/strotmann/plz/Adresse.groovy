@@ -11,8 +11,20 @@ class Adresse {
 		ort()
 		hnr(nullable:true)
 		plz()
-		str()
+		str(unique:['plz','str','hnr'])
     }
 	
 	String toString() {"${ort},${plz},${str},${hnr}" }
+	
+	static List getStrassen () {
+		def c = Adresse.createCriteria()
+		
+		def results = c.list {
+			projections {
+				sqlGroupProjection 'ort, plz, str, min(hnr) as hnrVon, max(hnr) as hnrBis', 'ort, plz, str', ['ort','plz','str','hnrVon','hnrBis'], [STRING,STRING,STRING,STRING,STRING]
+			}
+		}
+		
+		results
+	}
 }
