@@ -13,7 +13,11 @@ class LoadController {
 	SessionFactory sessionFactory
 	
 	def index() {
-		render ("keine Funktion")
+		render ("start test HnrSplit")
+		List <String> hNrn = Adresse.hNrn('14-19bb')
+		println "Adresse.hNrn[0]=${hNrn[0]}"
+		println "Adresse.hNrn[1]=${hNrn[1]}"
+		render ("ende  test HnrSplit")
 	}
 	def load() {
 		render ("AdressTabelle wird zu Strassen verdichtet")
@@ -86,7 +90,7 @@ class LoadController {
 			if (it.trim().startsWith("<nd"))
 				refActive = tagVal(it, "ref").toBigInteger()
 			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
-				adrL = [null,null,null,null]
+				adrL = [null,null,null,null,null]
 				lActive = true
 				if (it.trim().startsWith("<node"))
 					nodeActive = it
@@ -119,10 +123,7 @@ class LoadController {
 						plzNode.lon = punkt[1]
 						refActive = 0
 					}
-					String mapKey = plzNodeKey (minlat,maxlat,minlon,maxlon,plzNode.lat,plzNode.lon)
-					println "plzNode.lat=${plzNode.lat}"
-					println "plzNode.lon=${plzNode.lon}"
-					println "mapKey=${mapKey}"
+					String mapKey = PlzNode.plzNodeKey (minlat,maxlat,minlon,maxlon,plzNode.lat,plzNode.lon)
 					if (plzNodeMap[mapKey]) 
 						nodeList = plzNodeMap[mapKey]
 					else
@@ -134,17 +135,35 @@ class LoadController {
 //							cntLoad++
 //						else
 //							cntDup++
+//							
+//					if (adrL[4]) {
+//						//2. Adresse bilden
+//						cntAdr++
+//						def Adresse adresse2 = new Adresse()
+//						adresse2.ort = adresse.ort
+//						adresse2.hnr = adrL[4]
+//						adresse2.plz = adresse.plz
+//						adresse2.str = adresse.str
+//						println "adresse1=${adresse}"
+//						println "adresse2=${adresse2}"
+//						if (adresse2.save())
+//							cntLoad++
+//						else
+//							cntDup++
+//					}
 				}
-//				if (cntLoad %500 == 00) {
-//					//hibSession.flush()
-//					println "${cntAdr} sichere Adressen geladen, Duplikate nicht geladen: ${cntDup}"
-//				}
+				if (cntLoad %500 == 00) {
+					//hibSession.flush()
+					println "${cntAdr} sichere Adressen geladen, Duplikate nicht geladen: ${cntDup}"
+				}
 				lActive = false
 			}
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:city") 
 				adrL[0] = tagVal(it,'v')
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber")  
-				adrL[1] = hnrPad(tagVal(it,'v'))
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber") {
+				adrL[1] = Adresse.hNrn(tagVal(it,'v'))[0]
+				adrL[4] = Adresse.hNrn(tagVal(it,'v'))[1]
+			}
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:postcode") 
 				adrL[2] = tagVal(it,'v').toInteger()
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:street") 
@@ -168,7 +187,7 @@ class LoadController {
 			if (it.trim().startsWith("<nd"))
 				refActive = tagVal(it, "ref").toBigInteger()
 			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
-				adrL = [null,null,null,null]
+				adrL = [null,null,null,null,null]
 				lActive = true
 				if (it.trim().startsWith("<node"))
 					nodeActive = it
@@ -184,6 +203,7 @@ class LoadController {
 					
 					cntAdr++
 					cntAdrHerl++
+					println "cntAdrHerl=${cntAdrHerl}"
 					def Adresse adresse = new Adresse()
 					
 					List <BigDecimal> punkt
@@ -199,27 +219,38 @@ class LoadController {
 					//ort und plz durch Nachbarschaft ermitteln
 					BigDecimal bigDec0 = punkt[0]
 					BigDecimal bigDec1 = punkt[1]
-					String mapKey = plzNodeKey (minlat,maxlat,minlon,maxlon,bigDec0,bigDec1)
+					String mapKey = PlzNode.plzNodeKey (minlat,maxlat,minlon,maxlon,bigDec0,bigDec1)
 					if (plzNodeMap[mapKey]) 
 						nodeList = plzNodeMap[mapKey]
 					else
 						nodeList = [] 
-					if (cntAdrHerl %100 == 0)
-						println "vor  near time=${Calendar.instance.time}"
 					PlzNode plzNode = PlzNode.nearestPlzNode(nodeList, punkt)
-					if (cntAdrHerl %100 == 0)
-						println "nach near time=${Calendar.instance.time}"
 					adresse.ort = plzNode.ort
 					adresse.plz = plzNode.plz
 					adresse.hnr = adrL[1]
 					adresse.str = adrL[3]
-					if (adresse.save())
-							cntLoad++
+					if (adresse.save()) {
+							println "hergeleitet:${adresse}"
+					}
 						else
 							cntDup++
+							
+						if (adrL[4]) {
+							//2. Adresse bilden
+							cntAdr++
+							def Adresse adresse2 = new Adresse()
+							adresse2.ort = adresse.ort
+							adresse2.hnr = adrL[4]
+							adresse2.plz = adresse.plz
+							adresse2.str = adresse.str
+							if (adresse2.save())
+								cntLoad++
+							else
+								cntDup++
+						}
 				}
 				if (cntAdrHerl %5 == 00) {
-					//hibSession.flush()
+					hibSession.flush()
 					println "${cntAdrHerl} hergeleitete Adressen geladen, Duplikate nicht geladen: ${cntDup}"
 				}
 				lActive = false
@@ -227,8 +258,10 @@ class LoadController {
 			}
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:city")
 				adrL[0] = tagVal(it,'v')
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber")
-				adrL[1] = hnrPad(tagVal(it,'v'))
+			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber") {
+				adrL[1] = Adresse.hNrn(tagVal(it,'v'))[0]
+				adrL[4] = Adresse.hNrn(tagVal(it,'v'))[1]
+			}
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:postcode")
 				adrL[2] = tagVal(it,'v').toInteger()
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:street")
@@ -244,34 +277,6 @@ class LoadController {
 		Integer anfKey = line.trim().indexOf("${x}=") + x.length() + 2
 		Integer endKey = line.trim().indexOf('"', anfKey)
 		line.trim().substring(anfKey, endKey)
-	}
-	
-	String hnrPad (String hnr) {
-		def String n = ''
-		def String a = ''
-		if (hnr.contains('-')) {
-			n = hnr.split("-")[0]
-			a = "-"+hnr.split("-")[1]
-		}
-		else
-		for (Integer i = 0; i < hnr.length(); i++) {
-			String s = hnr.substring(i, i+1)
-			if (s.isNumber())
-				n += s
-			else
-				a += s
-		}
-		n = n.padLeft(4,'0') + a
-		n
-	}
-	
-	String plzNodeKey (BigDecimal minlat, BigDecimal maxlat, BigDecimal minlon, BigDecimal maxlon, BigDecimal lat, BigDecimal lon) {
-  		String nodeKey = ""
-		String latPart = (((lat - minlat)/(maxlat - minlat))*10).intValue().toString()
-		nodeKey += latPart
-		String lonPart = (((lon - minlon)/(maxlon - minlon))*10).intValue().toString()
-		nodeKey += lonPart
-		nodeKey
 	}
 	
 	def ladePlzKoeln() {
