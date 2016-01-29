@@ -119,18 +119,15 @@ class Sucher {
 		if (!hnr)
 			return sList.sort{a,b -> a.ort <=> b.ort?:(a.strasse<=>b.strasse)?:(a.hnrVon<=>b.hnrVon)}
 			
-		//Berücksichtigung der Hausnummer incl. gerade/ungerade (Straßenseite)	
+		//Berücksichtigung der Hausnummer 
 		List <Sucher> sHnrList = []
 		sList.each {Sucher s ->
 			
 			def boolean c1 = !s.hnrVon
-			def boolean c2, c3
-			if (s.hnrVon) {
+			def boolean c2
+			if (s.hnrVon) 
 				c2 = hnr.toInteger() >= s.hnrVon &&  hnr.toInteger() <= s.hnrBis
-				c3 = (hnr.toInteger() % 2) == (s.hnrVon % 2)
-			}
-			
-			if (c1 || (c2 && c3))
+			if (c1 || c2)
 				sHnrList << s
 		}
 		sHnrList.sort{a,b -> a.ort <=> b.ort?:(a.strasse<=>b.strasse)?:(a.hnrVon<=>b.hnrVon)}
