@@ -23,15 +23,12 @@ class LoadController {
 	def load() {
 		render ("AdressTabelle wird zu Strassen verdichtet")
 		def List strList = Adresse.strassen
+		def List selList = ['Holzwickede','Iserlohn','Kamen','Lünen','Schwerte','Witten','Unna']
 		def cntStr = 0, cntLoad = 0
 		strList.each {
 			cntStr++
-			Strasse strasse = new Strasse()
-			strasse.postleitzahl = it[1].toInteger()
-			strasse.strasse = it[2]
-			strasse.hausNrVon = it[3] 
-			strasse.hausNrBis = it[4]
-			if(it[0] == 'Datteln' )
+			Strasse strasse = new Strasse(postleitzahl:it[1].toInteger(),strasse:it[2],hausNrVon:it[3],hausNrBis:it[4])
+			if(it[0] in selList)
 				if (strasse.save())
 					cntLoad++
 					else
@@ -46,11 +43,13 @@ class LoadController {
 	}
 	def preload() {
 		render ("AdressTabelle wird aus OSM geladen")
+		def startZeit = Calendar.instance
+		println "timeIs=${startZeit.time}"
 		def hibSession = sessionFactory.getCurrentSession()
 		assert hibSession != null
 		def BigDecimal minlat, maxlat, minlon, maxlon
 		//nodeMap aufbauen
-		FileInputStream osmStream = new FileInputStream ("/vol/mapWaltrop");
+		FileInputStream osmStream = new FileInputStream ("/vol/map");
 		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
 		BufferedReader osm = new BufferedReader (osmReader)
 		Map nodeMap = [:]
@@ -63,10 +62,10 @@ class LoadController {
 				maxlon = tagVal(it, "maxlon").toBigDecimal()
 				println it 
 			}
-			if (cntNodeMap %10000 == 00)
-				println "${cntNodeMap} nodes geladen"
 			if (it.trim().startsWith("<node")) {
 				cntNodeMap++
+				if (cntNodeMap %1000000 == 00)
+					println "cntNodeMap=${cntNodeMap}"
 				BigInteger nodeId = tagVal(it,'id').toBigInteger()
 				nodeMap[nodeId] = [tagVal(it,'lat').toBigDecimal(),tagVal(it,'lon').toBigDecimal()]
 			}
@@ -74,7 +73,7 @@ class LoadController {
 		osm.close()
 		println "cntNode=${cntNodeMap}"
 		//sichere Adressen aufbauen
-		osmStream = new FileInputStream ("/vol/mapWaltrop");
+		osmStream = new FileInputStream ("/vol/map");
 		osmReader = new InputStreamReader(osmStream, "UTF-8")
 		osm = new BufferedReader (osmReader)
 		Integer cntRead = 0
@@ -100,19 +99,16 @@ class LoadController {
 			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
 				if (!adrL[0] && adrL[2]){
 					Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
-					adrL[0] = plz.ort
+					if (plz)
+						adrL[0] = plz.ort
+					else
+						println "plz ${adrL[2]} nicht gefunden"
 				}
 				if (adrL[0] && adrL[1] && adrL[2] && adrL[3]) {
 					cntAdr++
-					def Adresse adresse = new Adresse()
-					adresse.ort = adrL[0]
-					adresse.hnr = adrL[1]
-					adresse.plz = adrL[2]
-					adresse.str = adrL[3]
-					
-					PlzNode plzNode = new PlzNode()
-					plzNode.plz = adresse.plz
-					plzNode.ort = adresse.ort
+					def Adresse adresse = new Adresse(ort:adrL[0],hnr:adrL[1],plz:adrL[2],str:adrL[3])
+										
+					PlzNode plzNode = new PlzNode(plz:adresse.plz,ort:adresse.ort)
 					
 					if (it.trim().startsWith("</node")) {
 						plzNode.lat = tagVal(nodeActive, "lat").toBigDecimal()
@@ -134,32 +130,29 @@ class LoadController {
 					plzNodeMap[mapKey] = nodeList
 					
 					if (adresse.save())
-							cntLoad++
-						else
-							cntDup++
-							
+						cntLoad++
+					else
+						cntDup++
+						
 					if (adrL[4]) {
 						//2. Adresse bilden
 						cntAdr++
-						def Adresse adresse2 = new Adresse()
-						adresse2.ort = adresse.ort
-						adresse2.hnr = adrL[4]
-						adresse2.plz = adresse.plz
-						adresse2.str = adresse.str
-						println "adresse1=${adresse}"
-						println "adresse2=${adresse2}"
+						def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str)
 						if (adresse2.save())
 							cntLoad++
 						else
 							cntDup++
 					}
+					
+					if (cntRead %1000000 == 0) {
+						//hibSession.flush()
+						//println "${cntLoad} sichere Adressen geladen, Duplikate nicht geladen: ${cntDup}"
+					}
 				}
-				if (cntLoad %500 == 00) {
-					hibSession.flush()
-					println "${cntAdr} sichere Adressen geladen, Duplikate nicht geladen: ${cntDup}"
-				}
+				
 				lActive = false
 			}
+			
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:city") 
 				adrL[0] = tagVal(it,'v')
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber") {
@@ -170,14 +163,16 @@ class LoadController {
 				adrL[2] = tagVal(it,'v').toInteger()
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:street") 
 				adrL[3] = tagVal(it,'v')
+		
+			if (cntRead %1000000 == 0) {
+				println "${cntRead} Sätze gelesen,${cntAdr} sichere Adressen gefunden"
+			}
 		}
 		
 		
-		//println "plzNodeMap 96 enthält: ${plzNodeMap['96'].size()}"
-		
 		//hergeleitete Adressen aufbauen
 		println "Start Herleitung"
-		osmStream = new FileInputStream ("/vol/mapWaltrop");
+		osmStream = new FileInputStream ("/vol/map");
 		osmReader = new InputStreamReader(osmStream, "UTF-8")
 		osm = new BufferedReader (osmReader)
 		nodeActive = ""
@@ -185,7 +180,9 @@ class LoadController {
 		cntDup = 0
 		lActive = false
 		Integer cntAdrHerl = 0
+		cntRead = 0
 		osm.eachLine {String it ->
+			cntRead++
 			if (it.trim().startsWith("<nd"))
 				refActive = tagVal(it, "ref").toBigInteger()
 			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
@@ -198,7 +195,10 @@ class LoadController {
 				if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
 					if (!adrL[0] && adrL[2]){
 						Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
-						adrL[0] = plz.ort
+						if (plz)
+							adrL[0] = plz.ort
+						else
+							println "plz ${adrL[2]} nicht gefunden"
 					}
 				}
 				if (!adrL[0] && adrL[1] && !adrL[2] && adrL[3]) {
@@ -244,25 +244,23 @@ class LoadController {
 									if (adrL[4]) {
 										//2. Adresse bilden
 										cntAdr++
-										def Adresse adresse2 = new Adresse()
-										adresse2.ort = adresse.ort
-										adresse2.hnr = adrL[4]
-												adresse2.plz = adresse.plz
-												adresse2.str = adresse.str
-												if (adresse2.save())
-													cntLoad++
-													else
-														cntDup++
+										def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str)
+										if (adresse2.save())
+											cntLoad++
+										else
+											cntDup++
 									}
 					}
+					if (cntAdrHerl %1000 == 00) {
+						hibSession.flush()
+						println "${cntRead} Sätze gelesen,${cntAdrHerl} hergeleitete Adressen geladen, Duplikate nicht geladen: ${cntDup}"
+					}
 				}
-				if (cntAdrHerl %5 == 00) {
-					hibSession.flush()
-					println "${cntAdrHerl} hergeleitete Adressen geladen, Duplikate nicht geladen: ${cntDup}"
-				}
+				
 				lActive = false
 				
 			}
+			
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:city")
 				adrL[0] = tagVal(it,'v')
 			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber") {
@@ -277,7 +275,11 @@ class LoadController {
 		println "hergeleitete Adressen:${cntAdrHerl}"
 		hibSession.flush()
 		
+		def endeZeit = Calendar.instance
+		println "endeZeit=${endeZeit.time}"
+		println "startZeit=${startZeit.time}"
 		render (" Adress Tabelle wurde aus OSM geladen, ${cntRead} Zeilen gelesen, ${cntAdr} Adressen gefunden, ${cntLoad} Adressen geladen")
+			
 	}
 
 	String tagVal (String line, String x) {

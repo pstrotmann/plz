@@ -6,12 +6,14 @@ class Strasse {
 	Integer postleitzahl
 	String hausNrVon
 	String hausNrBis
+	Ortsteil ortsteil
 
     static constraints = {
 		strasse(unique:['postleitzahl','strasse','hausNrVon'])
 		postleitzahl()
 		hausNrVon(nullable:true)
 		hausNrBis(nullable:true)
+		ortsteil(nullable:true)
 	}
 	
 	static mapping = {
