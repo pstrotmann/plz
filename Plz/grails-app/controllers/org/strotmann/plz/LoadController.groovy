@@ -15,7 +15,6 @@ class LoadController {
 	def index() {
 		render ("start test preloader")
 		Preloader preloader = new Preloader(hibSession:sessionFactory.getCurrentSession())
-		preloader.ini()
 		preloader.aufbauNodeMap()
 		render ("ende  test preloader")
 	}
@@ -47,238 +46,21 @@ class LoadController {
 		def hibSession = sessionFactory.getCurrentSession()
 		assert hibSession != null
 		def BigDecimal minlat, maxlat, minlon, maxlon
+		Preloader preloader = new Preloader(eingabeMap:"/vol/mapDatteln",hibSession:sessionFactory.getCurrentSession())
 		
 		//nodeMap aufbauen
-		FileInputStream osmStream = new FileInputStream ("/vol/map");
-		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
-		BufferedReader osm = new BufferedReader (osmReader)
-		Map nodeMap = [:]
-		Integer cntNodeMap = 0
-		osm.eachLine {String it ->
-			if (it.trim().startsWith("<bounds")) {
-				minlat = tagVal(it, "minlat").toBigDecimal()
-				maxlat = tagVal(it, "maxlat").toBigDecimal()
-				minlon = tagVal(it, "minlon").toBigDecimal()
-				maxlon = tagVal(it, "maxlon").toBigDecimal()
-				println it 
-			}
-			if (it.trim().startsWith("<node")) {
-				cntNodeMap++
-				if (cntNodeMap %1000000 == 00)
-					println "cntNodeMap=${cntNodeMap}"
-				BigInteger nodeId = tagVal(it,'id').toBigInteger()
-				nodeMap[nodeId] = [tagVal(it,'lat').toBigDecimal(),tagVal(it,'lon').toBigDecimal()]
-			}
-		}
-		osm.close()
-		println "cntNode=${cntNodeMap}"
+		preloader.aufbauNodeMap()
 		
 		//sichere Adressen aufbauen
-		osmStream = new FileInputStream ("/vol/map");
-		osmReader = new InputStreamReader(osmStream, "UTF-8")
-		osm = new BufferedReader (osmReader)
-		Integer cntRead = 0
-		Integer cntLoad = 0
-		Integer cntAdr = 0
-		Integer cntDup = 0
-		List adrL
-		List <PlzNode> nodeList
-		Map plzNodeMap = [:]
-		String nodeActive = ""
-		BigInteger refActive = 0
-		Boolean lActive = false
-		osm.eachLine {String it ->
-			cntRead++
-			if (it.trim().startsWith("<nd"))
-				refActive = tagVal(it, "ref").toBigInteger()
-			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
-				adrL = [null,null,null,null,null]
-				lActive = true
-				if (it.trim().startsWith("<node"))
-					nodeActive = it
-			}
-			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-				if (!adrL[0] && adrL[2]){
-					Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
-					if (plz)
-						adrL[0] = plz.ort
-					else
-						println "plz ${adrL[2]} nicht gefunden"
-				}
-				if (adrL[0] && adrL[1] && adrL[2] && adrL[3]) {
-					cntAdr++
-					def Adresse adresse = new Adresse(ort:adrL[0],hnr:adrL[1],plz:adrL[2],str:adrL[3])
-										
-					PlzNode plzNode = new PlzNode(plz:adresse.plz,ort:adresse.ort)
-					
-					if (it.trim().startsWith("</node")) {
-						plzNode.lat = tagVal(nodeActive, "lat").toBigDecimal()
-						plzNode.lon = tagVal(nodeActive, "lon").toBigDecimal()
-						nodeActive = ""
-					}
-					else {//</way
-						List punkt = nodeMap[refActive]
-						plzNode.lat = punkt[0]
-						plzNode.lon = punkt[1]
-						refActive = 0
-					}
-					String mapKey = PlzNode.plzNodeKey (minlat,maxlat,minlon,maxlon,plzNode.lat,plzNode.lon)
-					if (plzNodeMap[mapKey]) 
-						nodeList = plzNodeMap[mapKey]
-					else
-						nodeList = []
-					nodeList << plzNode
-					plzNodeMap[mapKey] = nodeList
-					
-					if (adresse.save())
-						cntLoad++
-					else
-						cntDup++
-						
-					if (adrL[4]) {
-						//2. Adresse bilden
-						cntAdr++
-						def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str)
-						if (adresse2.save())
-							cntLoad++
-						else
-							cntDup++
-					}
-					
-					if (cntRead %1000000 == 0) {
-						//hibSession.flush()
-						//println "${cntLoad} sichere Adressen geladen, Duplikate nicht geladen: ${cntDup}"
-					}
-				}
-				
-				lActive = false
-			}
-			
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:city") 
-				adrL[0] = tagVal(it,'v')
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber") {
-				adrL[1] = Adresse.hNrn(tagVal(it,'v'))[0]
-				adrL[4] = Adresse.hNrn(tagVal(it,'v'))[1]
-			}
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:postcode") 
-				adrL[2] = tagVal(it,'v').toInteger()
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:street") 
-				adrL[3] = tagVal(it,'v')
-		
-			if (cntRead %1000000 == 0) {
-				println "${cntRead} Sätze gelesen,${cntAdr} sichere Adressen gefunden"
-			}
-		}
+		preloader.sichAdr()
 		
 		//hergeleitete Adressen aufbauen
-		println "Start Herleitung"
-		osmStream = new FileInputStream ("/vol/map");
-		osmReader = new InputStreamReader(osmStream, "UTF-8")
-		osm = new BufferedReader (osmReader)
-		nodeActive = ""
-		refActive = 0
-		cntDup = 0
-		lActive = false
-		Integer cntAdrHerl = 0
-		cntRead = 0
-		osm.eachLine {String it ->
-			cntRead++
-			if (it.trim().startsWith("<nd"))
-				refActive = tagVal(it, "ref").toBigInteger()
-			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
-				adrL = [null,null,null,null,null]
-				lActive = true
-				if (it.trim().startsWith("<node"))
-					nodeActive = it
-			}
-			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-				if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-					if (!adrL[0] && adrL[2]){
-						Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
-						if (plz)
-							adrL[0] = plz.ort
-						else
-							println "plz ${adrL[2]} nicht gefunden"
-					}
-				}
-				if (!adrL[0] && adrL[1] && !adrL[2] && adrL[3]) {
-					
-					cntAdr++
-					cntAdrHerl++
-					println "cntAdrHerl=${cntAdrHerl}"
-					def Adresse adresse = new Adresse()
-					
-					List <BigDecimal> punkt
-					if (it.trim().startsWith("</node")) {
-						punkt = [tagVal(nodeActive, "lat").toBigDecimal(),tagVal(nodeActive, "lon").toBigDecimal()]
-						nodeActive = ""
-					}
-					else {//</way
-						punkt = nodeMap[refActive]
-						refActive = 0
-					}
-					//jetzt aus nodeList den nächsten Punkt heraussuchen
-					//ort und plz durch Nachbarschaft ermitteln
-					BigDecimal bigDec0 = punkt[0]
-					BigDecimal bigDec1 = punkt[1]
-					String mapKey = PlzNode.plzNodeKey (minlat,maxlat,minlon,maxlon,bigDec0,bigDec1)
-					if (plzNodeMap[mapKey]) 
-						nodeList = plzNodeMap[mapKey]
-					else
-					if ((mapKey.toInteger()+1).toString().padLeft(2, '0').substring(0, 2))
-						nodeList = plzNodeMap[(mapKey.toInteger()+1).toString().padLeft(2, '0').substring(0, 2)]
-					else
-						nodeList = plzNodeMap[(mapKey.toInteger()-1).toString().padLeft(2, '0').substring(0, 2)]
-					if (nodeList && nodeList.size > 0) {
-						PlzNode plzNode = PlzNode.nearestPlzNode(nodeList, punkt)
-						adresse.ort = plzNode.ort
-						adresse.plz = plzNode.plz
-						adresse.hnr = adrL[1]
-						adresse.str = adrL[3]
-								if (adresse.save()) {
-									println "hergeleitet:${adresse}"
-								}
-								else
-									cntDup++
-									
-									if (adrL[4]) {
-										//2. Adresse bilden
-										cntAdr++
-										def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str)
-										if (adresse2.save())
-											cntLoad++
-										else
-											cntDup++
-									}
-					}
-					if (cntAdrHerl %1000 == 00) {
-						hibSession.flush()
-						println "${cntRead} Sätze gelesen,${cntAdrHerl} hergeleitete Adressen geladen, Duplikate nicht geladen: ${cntDup}"
-					}
-				}
-				
-				lActive = false
-				
-			}
-			
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:city")
-				adrL[0] = tagVal(it,'v')
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:housenumber") {
-				adrL[1] = Adresse.hNrn(tagVal(it,'v'))[0]
-				adrL[4] = Adresse.hNrn(tagVal(it,'v'))[1]
-			}
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:postcode")
-				adrL[2] = tagVal(it,'v').toInteger()
-			if (it.contains("<tag") && tagVal(it,'k') == "addr:street")
-				adrL[3] = tagVal(it,'v')
-		}
-		println "hergeleitete Adressen:${cntAdrHerl}"
-		hibSession.flush()
+		preloader.herlAdr()
 		
 		def endeZeit = Calendar.instance
 		println "endeZeit=${endeZeit.time}"
 		println "startZeit=${startZeit.time}"
-		render (" Adress Tabelle wurde aus OSM geladen, ${cntRead} Zeilen gelesen, ${cntAdr} Adressen gefunden, ${cntLoad} Adressen geladen")
+		render (" Adress Tabelle wurde aus OSM geladen, ${preloader.cntRead} Zeilen gelesen, ${preloader.cntAdr} Adressen gefunden, ${preloader.cntLoad} Adressen geladen")
 			
 	}
 

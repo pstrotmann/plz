@@ -6,12 +6,14 @@ class Adresse {
 	String hnr
 	Integer plz
 	String str
+	Ortsteil ortsteil
 	
     static constraints = {
 		ort()
 		hnr(nullable:true)
 		plz()
 		str(unique:['plz','str','hnr'])
+		ortsteil(nullable:true)
     }
 	
 	String toString() {"${ort},${plz},${str},${hnr}" }
