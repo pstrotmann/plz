@@ -13,12 +13,11 @@ class LoadController {
 	SessionFactory sessionFactory
 	
 	def index() {
-		render ("start test HnrSplit")
-		List <String> hNrn = Adresse.hNrn('14-19bb')
-		println "Adresse.hNrn[0]=${hNrn[0]}"
-		println "Adresse.hNrn[1]=${hNrn[1]}"
-		println "hNrn.size=${hNrn.size}"
-		render ("ende  test HnrSplit")
+		render ("start test preloader")
+		Preloader preloader = new Preloader(hibSession:sessionFactory.getCurrentSession())
+		preloader.ini()
+		preloader.aufbauNodeMap()
+		render ("ende  test preloader")
 	}
 	def load() {
 		render ("AdressTabelle wird zu Strassen verdichtet")
@@ -48,6 +47,7 @@ class LoadController {
 		def hibSession = sessionFactory.getCurrentSession()
 		assert hibSession != null
 		def BigDecimal minlat, maxlat, minlon, maxlon
+		
 		//nodeMap aufbauen
 		FileInputStream osmStream = new FileInputStream ("/vol/map");
 		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
@@ -72,6 +72,7 @@ class LoadController {
 		}
 		osm.close()
 		println "cntNode=${cntNodeMap}"
+		
 		//sichere Adressen aufbauen
 		osmStream = new FileInputStream ("/vol/map");
 		osmReader = new InputStreamReader(osmStream, "UTF-8")
@@ -168,7 +169,6 @@ class LoadController {
 				println "${cntRead} Sätze gelesen,${cntAdr} sichere Adressen gefunden"
 			}
 		}
-		
 		
 		//hergeleitete Adressen aufbauen
 		println "Start Herleitung"
