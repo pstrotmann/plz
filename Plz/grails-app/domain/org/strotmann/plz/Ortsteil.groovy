@@ -7,7 +7,7 @@ class Ortsteil {
 	String liegtIn
 
     static constraints = {
-		typ(inList:['town','city','suburb'])
+		typ(inList:['town','city','suburb','hamlet'])
 		name(unique:['liegtIn'])
 		liegtIn()
     }

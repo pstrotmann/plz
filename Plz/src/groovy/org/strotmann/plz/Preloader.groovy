@@ -61,7 +61,7 @@ class Preloader {
 				}
 			}
 			
-			if (it.contains("<tag") && tagVal(it,'k') == "place" && tagVal(it,'v') in ["city","town","suburb"])
+			if (it.contains("<tag") && tagVal(it,'k') == "place" && tagVal(it,'v') in ["city","town","suburb","hamlet"])
 				otTags[0] = tagVal(it,'v')
 			if (it.contains("<tag") && tagVal(it,'k') == "name")
 				otTags[1] = tagVal(it,'v')
@@ -130,7 +130,7 @@ class Preloader {
 						nodeList = []
 					nodeList << plzNode
 					plzNodeMap[mapKey] = nodeList
-					
+					adresse.ortsteil = findOt([plzNode.lat,plzNode.lon], adresse.ort)
 					if (adresse.save())
 						cntLoad++
 					else
@@ -227,25 +227,22 @@ class Preloader {
 						adresse.plz = plzNode.plz
 						adresse.hnr = adrL[1]
 						adresse.str = adrL[3]
-						OtNode otNearest = OtNode.nearestOtNode(ortsteilList,punkt)
-						String otName = otNearest.name
-						String isIn = otNearest.isIn
-						adresse.ortsteil = Ortsteil.findByNameAndLiegtIn(otName,isIn)
+						adresse.ortsteil = findOt(punkt, adresse.ort)
 						if (adresse.save()) {
-							println "hergeleitet:${adresse}"
+							cntLoad++
 						}
 						else
 							cntDup++
 							
-							if (adrL[4]) {
-								//2. Adresse bilden
-								cntAdr++
-								def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str)
-								if (adresse2.save())
-									cntLoad++
-								else
-									cntDup++
-							}
+						if (adrL[4]) {
+							//2. Adresse bilden
+							cntAdr++
+							def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str)
+							if (adresse2.save())
+								cntLoad++
+							else
+								cntDup++
+						}
 					}
 					if (cntAdrHerl %1000 == 00) {
 						hibSession.flush()
@@ -290,6 +287,17 @@ class Preloader {
 		InputStreamReader osmReader = new InputStreamReader(osmStream, "UTF-8")
 		BufferedReader osm = new BufferedReader (osmReader)
 		osm
+	}
+	
+	Ortsteil findOt(List punkt, String ort) {
+		Ortsteil ot
+		OtNode otNearest = OtNode.nearestOtNode(ortsteilList,punkt)
+		String otName = otNearest.name
+		String isIn = otNearest.isIn
+		ot = Ortsteil.findByNameAndLiegtIn(otName,isIn)
+		if (!(ort in ot.liegtIn.split(',')))
+			ot = Ortsteil.findByNameAndTypInList(ort,['city','town'])
+		ot
 	}
 	
 	Integer getCntRead() {cntRead} 
