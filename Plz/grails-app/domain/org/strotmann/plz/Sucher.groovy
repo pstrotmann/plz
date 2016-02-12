@@ -10,6 +10,7 @@ class Sucher {
 	String zusatz
 	Integer postleitzahl
 	String ort
+	Ortsteil ortsteil
 	
 	Integer hnrVon
 	String zusVon
@@ -75,14 +76,10 @@ class Sucher {
 				sList << s
 			}
 			else strassen.each {Strasse str -> 
-				Sucher s = new Sucher()
-				s.postleitzahl = p.plz
-				s.ort = p.ort
-				s.strasse = str.strasse
-				s.hnrVon = hnrN(str.hausNrVon)
-				s.hnrBis = hnrN(str.hausNrBis)
-				s.zusVon = hnrA(str.hausNrVon)
-				s.zusBis = hnrA(str.hausNrBis)
+				Sucher s = new Sucher(postleitzahl:p.plz,ort:p.ort,strasse:str.strasse,
+									hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
+									zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),
+									ortsteil:str.ortsteil)
 				sList << s
 			}
 		}
@@ -103,14 +100,10 @@ class Sucher {
 				
 				strassen.each {Strasse str ->
 					if (strasse.size() <= str.strasse.size() && strasse.toUpperCase() == str.strasse.substring(0, strasse.size()).toUpperCase()) {
-						Sucher s = new Sucher()
-						s.postleitzahl = p.plz
-						s.ort = p.ort
-						s.strasse = str.strasse
-						s.hnrVon = hnrN(str.hausNrVon)
-						s.hnrBis = hnrN(str.hausNrBis)
-						s.zusVon = hnrA(str.hausNrVon)
-						s.zusBis = hnrA(str.hausNrBis)
+						Sucher s = new Sucher(postleitzahl:p.plz,ort:p.ort,strasse:str.strasse,
+									hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
+									zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),
+									ortsteil:str.ortsteilKlar)
 						sList << s
 					}
 				}

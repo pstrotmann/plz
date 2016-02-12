@@ -22,4 +22,13 @@ class Strasse {
 	}
 	
 	String toString() {"${postleitzahl} ${strasse} ${hausNrVon} ${hausNrBis}" }
+
+	String getOrtsteilKlar() {
+		String n
+		n = ortsteil.name
+		if (n == Postleitzahl.findByPlz(postleitzahl).ort)
+			n = null
+		n
+	}
+	
 }

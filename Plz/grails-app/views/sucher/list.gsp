@@ -31,6 +31,8 @@
 						<g:sortableColumn property="hnrVon" title="${message(code: 'strasse.hnrVon.label')}" />
 						
 						<g:sortableColumn property="hnrBis" title="${message(code: 'strasse.hnrBis.label')}" />
+						
+						<th><g:message code="strasse.ortsteil.label" default="Ortsteil" /></th>
 								
 					</tr>
 				</thead>
@@ -51,6 +53,8 @@
 						<td>${fieldValue(bean: sucherInstance, field: "hnrVon")}</td>
 						
 						<td>${fieldValue(bean: sucherInstance, field: "hnrBis")}</td>
+						
+						<td>${fieldValue(bean: sucherInstance, field: "ortsteil.name")}</td>
 											
 					</tr>
 				</g:each>

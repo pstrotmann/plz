@@ -31,6 +31,8 @@
 						<g:sortableColumn property="hnrBis" title="${message(code: 'strasse.hnrBis.label', default: 'Hnr Bis')}" />
 					
 						<th><g:message code="strasse.plz.label" default="Plz" /></th>
+						
+						<th><g:message code="strasse.ortsteil.label" default="Ortsteil" /></th>
 					
 					</tr>
 				</thead>
@@ -45,6 +47,8 @@
 						<td>${fieldValue(bean: strasseInstance, field: "hausNrBis")}</td>
 					
 						<td>${fieldValue(bean: strasseInstance, field: "postleitzahl")}</td>
+						
+						<td>${fieldValue(bean: strasseInstance, field: "ortsteilKlar")}</td>
 					
 					</tr>
 				</g:each>
