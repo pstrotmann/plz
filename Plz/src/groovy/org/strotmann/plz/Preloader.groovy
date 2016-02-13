@@ -179,20 +179,26 @@ class Preloader {
 			if (it.trim().startsWith("<nd"))
 				refActive = tagVal(it, "ref").toBigInteger()
 			if (it.trim().startsWith("<node") || it.trim().startsWith("<way")) {
-				adrL = [null,null,null,null,null]
+				adrL = [null,null,null,null,null,null,null]
 				lActive = true
 				if (it.trim().startsWith("<node"))
 					nodeActive = it
 			}
 			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-				if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-					if (!adrL[0] && adrL[2]){
-						Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
-						if (plz)
-							adrL[0] = plz.ort
-						else
-							println "plz ${adrL[2]} nicht gefunden"
-					}
+		  //if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
+				if (!adrL[0] && adrL[2]){
+					Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
+					if (plz)
+						adrL[0] = plz.ort
+					else
+						println "plz ${adrL[2]} nicht gefunden"
+				}
+			//}
+				if (it.trim().startsWith("</way")) {
+					if (!adrL[0] && !adrL[1] && !adrL[2] && !adrL[3] && adrL[5] && adrL[6]) {
+						adrL[1] = ' '
+						adrL[3] = adrL[6]
+						}
 				}
 				if (!adrL[0] && adrL[1] && !adrL[2] && adrL[3]) {
 					
@@ -269,6 +275,7 @@ class Preloader {
 	
 	List tagL (String s, List adrL) {
 		List l = adrL
+		List hwTypes = ['path','footway','residential','primary','secondary','tertiary','primary_link','secondary_link','tertiary_link','service']
 		if (s.contains("<tag") && tagVal(s,'k') == "addr:city")
 			adrL[0] = tagVal(s,'v')
 		if (s.contains("<tag") && tagVal(s,'k') == "addr:housenumber") {
@@ -279,6 +286,10 @@ class Preloader {
 			adrL[2] = tagVal(s,'v').toInteger()
 		if (s.contains("<tag") && tagVal(s,'k') == "addr:street")
 			adrL[3] = tagVal(s,'v')
+		if (s.contains("<tag") && tagVal(s,'k') == "highway" && tagVal(s,'v') in hwTypes)
+			adrL[5] = tagVal(s,'v')
+		if (s.contains("<tag") && tagVal(s,'k') == "name")
+			adrL[6] = tagVal(s,'v')
 		l
 	}
 	

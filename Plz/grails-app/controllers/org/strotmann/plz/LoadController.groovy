@@ -21,7 +21,7 @@ class LoadController {
 	def load() {
 		render ("AdressTabelle wird zu Strassen verdichtet")
 		def List strList = Adresse.strassen
-		def List selList = ['Datteln','Waltrop']
+		def List selList = ['Bad Kreuznach','Bad Sobernheim']
 		def cntStr = 0, cntLoad = 0
 		strList.each {
 			cntStr++
@@ -47,7 +47,7 @@ class LoadController {
 		def hibSession = sessionFactory.getCurrentSession()
 		assert hibSession != null
 		def BigDecimal minlat, maxlat, minlon, maxlon
-		Preloader preloader = new Preloader(eingabeMap:"/vol/mapWaltrop",hibSession:sessionFactory.getCurrentSession())
+		Preloader preloader = new Preloader(eingabeMap:"/vol/map",hibSession:sessionFactory.getCurrentSession())
 		
 		//nodeMap aufbauen
 		preloader.aufbauNodeMap()
