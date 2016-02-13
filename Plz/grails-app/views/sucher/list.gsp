@@ -54,8 +54,13 @@
 						
 						<td>${fieldValue(bean: sucherInstance, field: "hnrBis")}</td>
 						
-						<td>${fieldValue(bean: sucherInstance, field: "ortsteil.name")}</td>
-											
+						<g:if test="${sucherInstance?.ortsteil}">
+							<td>
+							<g:link controller="strasse" action="show" params="[id:sucherInstance.strasseId]" >
+								${fieldValue(bean: sucherInstance, field: "ortsteil.name")}
+							</g:link>
+							</td>
+						</g:if>					
 					</tr>
 				</g:each>
 				</tbody>

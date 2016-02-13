@@ -11,6 +11,7 @@ class Sucher {
 	Integer postleitzahl
 	String ort
 	Ortsteil ortsteil
+	Integer strasseId
 	
 	Integer hnrVon
 	String zusVon
@@ -79,7 +80,7 @@ class Sucher {
 				Sucher s = new Sucher(postleitzahl:p.plz,ort:p.ort,strasse:str.strasse,
 									hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
 									zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),
-									ortsteil:str.ortsteil)
+									ortsteil:str.ortsteil,strasseId:str.id)
 				sList << s
 			}
 		}
@@ -103,7 +104,7 @@ class Sucher {
 						Sucher s = new Sucher(postleitzahl:p.plz,ort:p.ort,strasse:str.strasse,
 									hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
 									zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),
-									ortsteil:str.ortsteilKlar)
+									ortsteil:str.ortsteil,strasseId:str.id)
 						sList << s
 					}
 				}
