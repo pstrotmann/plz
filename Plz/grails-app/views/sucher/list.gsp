@@ -41,7 +41,10 @@
 					<tr class="${(i % 2) == 0 ? 'even' : 'odd'}">
 					
 						<g:if test="${sucherInstance?.mitStrassen && !sucherInstance?.strasse}">
-							<td><g:link action="list" params="[postleitzahl:sucherInstance.postleitzahl]" id="${sucherInstance.id}">${fieldValue(bean: sucherInstance, field: "plz5")}</g:link></td>
+							<td>
+							<g:link action="list" params="[postleitzahl:sucherInstance.postleitzahl,ort:sucherInstance.ort]" id="${sucherInstance.id}">
+								${fieldValue(bean: sucherInstance, field: "plz5")}
+							</g:link></td>
 						</g:if>
 						<g:else>
 							<td>${fieldValue(bean: sucherInstance, field: "plz5")}</td>

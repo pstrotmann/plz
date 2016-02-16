@@ -21,13 +21,13 @@ class LoadController {
 	def load() {
 		render ("AdressTabelle wird zu Strassen verdichtet")
 		def List strList = Adresse.strassen
-		def List selList = ['Bad Kreuznach','Bad Sobernheim']
+		def List selList = [55566]
 		def cntStr = 0, cntLoad = 0
 		strList.each {
 			cntStr++
-			Strasse strasse = new Strasse(postleitzahl:it[1].toInteger(),strasse:it[3],hausNrVon:it[4],hausNrBis:it[5])
+			Strasse strasse = new Strasse(ort:it[0],postleitzahl:it[1].toInteger(),strasse:it[3],hausNrVon:it[4],hausNrBis:it[5])
 			strasse.ortsteil = Ortsteil.findById(it[2])
-			if(it[0] in selList)
+			if(it[1].toInteger() in selList)
 				if (strasse.save())
 					cntLoad++
 					else

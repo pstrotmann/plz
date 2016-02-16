@@ -7,6 +7,7 @@ class Strasse {
 	String hausNrVon
 	String hausNrBis
 	Ortsteil ortsteil
+	String ort
 
     static constraints = {
 		strasse(unique:['postleitzahl','strasse','hausNrVon'])
@@ -14,6 +15,7 @@ class Strasse {
 		hausNrVon(nullable:true)
 		hausNrBis(nullable:true)
 		ortsteil(nullable:true)
+		ort(nullable:true)
 	}
 	
 	static mapping = {
@@ -21,7 +23,7 @@ class Strasse {
 		postleitzahl column: "postleitzahl", index: "postleitzahl"
 	}
 	
-	String toString() {"${postleitzahl} ${strasse} ${hausNrVon} ${hausNrBis}" }
+	String toString() {"${postleitzahl} ${ortsteil} ${strasse} ${hausNrVon} ${hausNrBis}" }
 
 	String getOrtsteilKlar() {
 		String n
@@ -31,4 +33,12 @@ class Strasse {
 		n
 	}
 	
+	String getOrt() {
+		String o
+		if (ort)
+			o = ort
+		else
+			o = Postleitzahl.findByPlz(postleitzahl).ort
+		o
+	}
 }

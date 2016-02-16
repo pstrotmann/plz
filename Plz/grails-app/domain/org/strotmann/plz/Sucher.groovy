@@ -41,6 +41,8 @@ class Sucher {
 			return getMatchesOrt(params.ort)
 		if (l == [0,0,0,1,0])
 			return getMatchesPlz(params.postleitzahl)
+		if (l == [0,0,0,1,1])
+			return getMatchesPlzOrt(params.postleitzahl,params.ort)
 			
 	}
 	
@@ -77,13 +79,45 @@ class Sucher {
 				sList << s
 			}
 			else strassen.each {Strasse str -> 
+				if (str.ort== p.ort) {
+					Sucher s = new Sucher(postleitzahl:p.plz,ort:p.ort,strasse:str.strasse,
+								hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
+								zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),
+								ortsteil:str.ortsteil,strasseId:str.id)
+					sList << s
+				}
+			}
+		}
+		sList.sort{it.strasse}
+	}
+	
+	static List getMatchesPlzOrt(String plz, String ort) {
+		
+		List <Sucher> sList = []
+		Integer hPlz = plz.toInteger()
+		String hOrt = ort
+		def query = Postleitzahl.where {
+			plz == hPlz && ort == hOrt && grosskunde == null
+		}
+		Postleitzahl p = query.find()
+		String q = "from Strasse as s where s.postleitzahl = ${p.plz}"
+		def strassen = Strasse.findAll(q)
+		if (strassen.empty) {
+			Sucher s = new Sucher()
+			s.postleitzahl = p.plz
+			s.ort = p.ort
+			sList << s
+		}
+		else strassen.each {Strasse str ->
+			if (str.ort== p.ort) {
 				Sucher s = new Sucher(postleitzahl:p.plz,ort:p.ort,strasse:str.strasse,
-									hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
-									zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),
-									ortsteil:str.ortsteil,strasseId:str.id)
+							hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
+							zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),
+							ortsteil:str.ortsteil,strasseId:str.id)
 				sList << s
 			}
 		}
+		
 		sList.sort{it.strasse}
 	}
 		

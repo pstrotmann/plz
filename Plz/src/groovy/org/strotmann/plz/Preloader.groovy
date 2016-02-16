@@ -61,7 +61,7 @@ class Preloader {
 				}
 			}
 			
-			if (it.contains("<tag") && tagVal(it,'k') == "place" && tagVal(it,'v') in ["city","town","suburb","hamlet"])
+			if (it.contains("<tag") && tagVal(it,'k') == "place" && tagVal(it,'v') in ["city","town","suburb","hamlet","village"])
 				otTags[0] = tagVal(it,'v')
 			if (it.contains("<tag") && tagVal(it,'k') == "name")
 				otTags[1] = tagVal(it,'v')
@@ -99,13 +99,7 @@ class Preloader {
 					nodeActive = it
 			}
 			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-				if (!adrL[0] && adrL[2]){
-					Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
-					if (plz)
-						adrL[0] = plz.ort
-					else
-						println "plz ${adrL[2]} nicht gefunden"
-				}
+				adrL = komplettOrtPlz(adrL)
 				if (adrL[0] && adrL[1] && adrL[2] && adrL[3]) {
 					cntAdr++
 					def Adresse adresse = new Adresse(ort:adrL[0],hnr:adrL[1],plz:adrL[2],str:adrL[3])
@@ -139,7 +133,7 @@ class Preloader {
 					if (adrL[4]) {
 						//2. Adresse bilden
 						cntAdr++
-						def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str)
+						def Adresse adresse2 = new Adresse(ort:adresse.ort,hnr:adrL[4],plz:adresse.plz,str:adresse.str,ortsteil:adresse.ortsteil)
 						if (adresse2.save())
 							cntLoad++
 						else
@@ -185,23 +179,12 @@ class Preloader {
 					nodeActive = it
 			}
 			if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-		  //if (it.trim().startsWith("</node") || it.trim().startsWith("</way")) {
-				if (!adrL[0] && adrL[2]){
-					Postleitzahl plz = Postleitzahl.find ("from Postleitzahl as p where p.plz = ${adrL[2]}")
-					if (plz)
-						adrL[0] = plz.ort
-					else
-						println "plz ${adrL[2]} nicht gefunden"
-				}
-			//}
-				if (it.trim().startsWith("</way")) {
-					if (!adrL[0] && !adrL[1] && !adrL[2] && !adrL[3] && adrL[5] && adrL[6]) {
-						adrL[1] = ' '
-						adrL[3] = adrL[6]
-						}
+				adrL = komplettOrtPlz(adrL)
+				if (!adrL[0] && !adrL[1] && !adrL[2] && !adrL[3] && adrL[5] && adrL[6]) {
+					adrL[1] = ' '
+					adrL[3] = adrL[6]
 				}
 				if (!adrL[0] && adrL[1] && !adrL[2] && adrL[3]) {
-					
 					cntAdr++
 					cntAdrHerl++
 					def Adresse adresse = new Adresse()
@@ -231,7 +214,10 @@ class Preloader {
 						PlzNode plzNode = PlzNode.nearestPlzNode(nodeList, punkt)
 						adresse.ort = plzNode.ort
 						adresse.plz = plzNode.plz
-						adresse.hnr = adrL[1]
+						if (adrL[1] == ' ')
+							adresse.hnr = null
+						else
+							adresse.hnr = adrL[1]
 						adresse.str = adrL[3]
 						adresse.ortsteil = findOt(punkt, adresse.ort)
 						if (adresse.save()) {
@@ -305,10 +291,34 @@ class Preloader {
 		OtNode otNearest = OtNode.nearestOtNode(ortsteilList,punkt)
 		String otName = otNearest.name
 		String isIn = otNearest.isIn
+		
 		ot = Ortsteil.findByNameAndLiegtIn(otName,isIn)
-		if (!(ort in ot.liegtIn.split(',')))
-			ot = Ortsteil.findByNameAndTypInList(ort,['city','town'])
+//		if (ot && !(ort in ot.liegtIn.split(',')))
+//			ot = Ortsteil.findByNameAndTypInList(ort,['city','town'])
+		if (!ot)
+			println "typ=${otNearest.place},otName=${otName},isIn=${isIn}"
 		ot
+	}
+	
+	List komplettOrtPlz (List adrL) {
+		List komplett = adrL
+		String ort = adrL[0]
+		Integer plz = adrL[2]
+		List plzn = []
+		if (ort && !plz) {
+			plzn = Postleitzahl.findAllByOrt(ort)
+			if (plzn.size() == 1)
+				komplett[2] = plzn[0].plz
+		}
+		if (!ort && plz) {
+			plzn = Postleitzahl.findAllByPlz(plz)
+			if (plzn.size() == 1)
+				komplett[0] = plzn[0].ort
+			else
+				if (plzn.size() == 0)
+					println "plz ${plz} nicht gefunden"
+		}
+		komplett
 	}
 	
 	Integer getCntRead() {cntRead} 
