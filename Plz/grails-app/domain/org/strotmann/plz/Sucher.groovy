@@ -171,6 +171,16 @@ class Sucher {
 		postleitzahl.toString().padLeft(5, "0")
 	}
 	
+	String getOrtsteilName() {
+		if (!ortsteil)
+			return null
+		else
+			if (ortsteil.name == ort)
+				return null
+			else
+				return ortsteil.name
+	}
+	
 	static Integer hnrN (String hnr) {
 		if (!hnr) return null
 		def String n = ''

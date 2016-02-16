@@ -28,6 +28,7 @@ class Preloader {
 		cntLoad = 0
 		List otTags = []
 		String nAct = ""
+		println "Version mit ortsteilen"
 		osm.eachLine {String it ->
 			if (it.trim().startsWith("<bounds")) {
 				minlat = tagVal(it, "minlat").toBigDecimal()
@@ -287,17 +288,11 @@ class Preloader {
 	}
 	
 	Ortsteil findOt(List punkt, String ort) {
-		Ortsteil ot
 		OtNode otNearest = OtNode.nearestOtNode(ortsteilList,punkt)
 		String otName = otNearest.name
 		String isIn = otNearest.isIn
 		
-		ot = Ortsteil.findByNameAndLiegtIn(otName,isIn)
-//		if (ot && !(ort in ot.liegtIn.split(',')))
-//			ot = Ortsteil.findByNameAndTypInList(ort,['city','town'])
-		if (!ot)
-			println "typ=${otNearest.place},otName=${otName},isIn=${isIn}"
-		ot
+		Ortsteil.findByNameAndLiegtIn(otName,isIn)
 	}
 	
 	List komplettOrtPlz (List adrL) {

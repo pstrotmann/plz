@@ -9,10 +9,12 @@
 	<body>
 		<a href="#list-sucher" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
+			<fieldset class="buttons">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
-				<li><g:link class="create" action="create"><g:message code="default.sucher.label"/></g:link></li>
+				<li><g:link class="search" action="create"><g:message code="default.sucher.label"/></g:link></li>
 			</ul>
+			</fieldset>
 		</div>
 		<div id="list-sucher" class="content scaffold-list" role="main">
 			<h1><g:message code="default.list.label" args="[entityName]" /></h1>
@@ -50,20 +52,17 @@
 							<td>${fieldValue(bean: sucherInstance, field: "plz5")}</td>
 						</g:else>
 						<td>${fieldValue(bean: sucherInstance, field: "ort")}</td>
-						
-						<td>${fieldValue(bean: sucherInstance, field: "strasse")}</td>
-						
+						<td>
+							<g:link controller="strasse" action="show" params="[id:sucherInstance.strasseId]" >
+								${fieldValue(bean: sucherInstance, field: "strasse")}
+							</g:link>
+						</td>
 						<td>${fieldValue(bean: sucherInstance, field: "hnrVon")}</td>
 						
 						<td>${fieldValue(bean: sucherInstance, field: "hnrBis")}</td>
 						
-						<g:if test="${sucherInstance?.ortsteil}">
-							<td>
-							<g:link controller="strasse" action="show" params="[id:sucherInstance.strasseId]" >
-								${fieldValue(bean: sucherInstance, field: "ortsteil.name")}
-							</g:link>
-							</td>
-						</g:if>					
+						<td>${fieldValue(bean: sucherInstance, field: "ortsteilName")}</td>
+											
 					</tr>
 				</g:each>
 				</tbody>
