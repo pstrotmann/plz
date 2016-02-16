@@ -46,9 +46,9 @@ class Preloader {
 				nAct = it
 			}
 			
-			if (it.trim().startsWith("</node") && otTags[0] && otTags[1] && otTags[2]) {
+			if (it.trim().startsWith("</node") && otTags[0] && otTags[1]) {
 				cntOtMap++
-				OtNode otNode = new OtNode(place:otTags[0],name:otTags[1],isIn:otTags[2],
+				OtNode otNode = new OtNode(place:otTags[0],name:otTags[1],isIn:otTags[2]?:otTags[1],
 											lat:tagVal(nAct, "lat").toBigDecimal(),lon:tagVal(nAct, "lon").toBigDecimal())
 				nAct = ""
 				ortsteilList << otNode
