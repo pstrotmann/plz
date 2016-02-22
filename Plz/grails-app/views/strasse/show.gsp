@@ -32,47 +32,44 @@
 				</li>
 				</g:if>
 			
-				<g:if test="${strasseInstance?.hnrVon}">
+				<g:if test="${strasseInstance?.hausNrVon}">
 				<li class="fieldcontain">
-					<span id="hnrVon-label" class="property-label"><g:message code="strasse.hnrVon.label" default="Hnr Von" /></span>
+					<span id="hnrVon-label" class="property-label"><g:message code="strasse.hnrVon.label" default="Hausnr Von" /></span>
 					
-						<span class="property-value" aria-labelledby="hnrVon-label"><g:fieldValue bean="${strasseInstance}" field="hnrVon"/></span>
+						<span class="property-value" aria-labelledby="hnrVon-label"><g:fieldValue bean="${strasseInstance}" field="hausNrVon"/></span>
 					
 				</li>
 				</g:if>
 			
-				<g:if test="${strasseInstance?.zusVon}">
+				<g:if test="${strasseInstance?.hausNrBis}">
 				<li class="fieldcontain">
-					<span id="zusVon-label" class="property-label"><g:message code="strasse.zusVon.label" default="Zus Von" /></span>
+					<span id="hnrBis-label" class="property-label"><g:message code="strasse.hnrBis.label" default="Hausnr Bis" /></span>
 					
-						<span class="property-value" aria-labelledby="zusVon-label"><g:fieldValue bean="${strasseInstance}" field="zusVon"/></span>
+						<span class="property-value" aria-labelledby="hnrBis-label"><g:fieldValue bean="${strasseInstance}" field="hausNrBis"/></span>
 					
 				</li>
 				</g:if>
 			
-				<g:if test="${strasseInstance?.hnrBis}">
-				<li class="fieldcontain">
-					<span id="hnrBis-label" class="property-label"><g:message code="strasse.hnrBis.label" default="Hnr Bis" /></span>
-					
-						<span class="property-value" aria-labelledby="hnrBis-label"><g:fieldValue bean="${strasseInstance}" field="hnrBis"/></span>
-					
-				</li>
-				</g:if>
-			
-				<g:if test="${strasseInstance?.zusBis}">
-				<li class="fieldcontain">
-					<span id="zusBis-label" class="property-label"><g:message code="strasse.zusBis.label" default="Zus Bis" /></span>
-					
-						<span class="property-value" aria-labelledby="zusBis-label"><g:fieldValue bean="${strasseInstance}" field="zusBis"/></span>
-					
-				</li>
-				</g:if>
-			
-				<g:if test="${strasseInstance?.plz}">
+				<g:if test="${strasseInstance?.postleitzahl}">
 				<li class="fieldcontain">
 					<span id="plz-label" class="property-label"><g:message code="strasse.plz.label" default="Plz" /></span>
 					
-						<span class="property-value" aria-labelledby="plz-label"><g:link controller="postleitzahl" action="show" id="${strasseInstance?.plz?.id}">${strasseInstance?.plz?.encodeAsHTML()}</g:link></span>
+						<span class="property-value" aria-labelledby="plz-label"><g:fieldValue bean="${strasseInstance}" field="postleitzahl"/></span>
+					
+				</li>
+				</g:if>
+				
+				<g:if test="${strasseInstance?.ortsteil}">
+				<li class="fieldcontain">
+					<span id="ortsteil-label" class="property-label"><g:message code="strasse.ortsteil.label" default="Ort/Ortsteil" /></span>
+					
+						<span class="property-value" aria-labelledby="ortsteil-label"><g:fieldValue bean="${strasseInstance}" field="ortsteil.name"/></span>
+					
+				</li>
+				<li class="fieldcontain">
+					<span id="liegtIn-label" class="property-label"><g:message code="strasse.liegtIn.label" default="liegt in" /></span>
+					
+						<span class="property-value" aria-labelledby="liegtIn-label"><g:fieldValue bean="${strasseInstance}" field="ortsteil.liegtIn"/></span>
 					
 				</li>
 				</g:if>

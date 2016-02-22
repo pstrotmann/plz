@@ -28,13 +28,11 @@
 					
 						<g:sortableColumn property="hnrVon" title="${message(code: 'strasse.hnrVon.label', default: 'Hnr Von')}" />
 					
-						<g:sortableColumn property="zusVon" title="${message(code: 'strasse.zusVon.label', default: 'Zus Von')}" />
-					
 						<g:sortableColumn property="hnrBis" title="${message(code: 'strasse.hnrBis.label', default: 'Hnr Bis')}" />
 					
-						<g:sortableColumn property="zusBis" title="${message(code: 'strasse.zusBis.label', default: 'Zus Bis')}" />
-					
 						<th><g:message code="strasse.plz.label" default="Plz" /></th>
+						
+						<th><g:message code="strasse.ortsteil.label" default="Ortsteil" /></th>
 					
 					</tr>
 				</thead>
@@ -44,15 +42,13 @@
 					
 						<td><g:link action="show" id="${strasseInstance.id}">${fieldValue(bean: strasseInstance, field: "strasse")}</g:link></td>
 					
-						<td>${fieldValue(bean: strasseInstance, field: "hnrVon")}</td>
+						<td>${fieldValue(bean: strasseInstance, field: "hausNrVon")}</td>
 					
-						<td>${fieldValue(bean: strasseInstance, field: "zusVon")}</td>
+						<td>${fieldValue(bean: strasseInstance, field: "hausNrBis")}</td>
 					
-						<td>${fieldValue(bean: strasseInstance, field: "hnrBis")}</td>
-					
-						<td>${fieldValue(bean: strasseInstance, field: "zusBis")}</td>
-					
-						<td>${fieldValue(bean: strasseInstance, field: "plz")}</td>
+						<td>${fieldValue(bean: strasseInstance, field: "postleitzahl")}</td>
+						
+						<td>${fieldValue(bean: strasseInstance, field: "ortsteilKlar")}</td>
 					
 					</tr>
 				</g:each>

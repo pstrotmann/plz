@@ -1,13 +1,76 @@
 package org.strotmann.plz
 
+import java.util.List;
+
 import org.apache.poi.hssf.usermodel.HSSFRow
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
+import org.hibernate.SessionFactory;
+import java.util.calendar.*
 
 class LoadController {
+	SessionFactory sessionFactory
 	
 	def index() {
+		render ("start test preloader")
+		Preloader preloader = new Preloader(hibSession:sessionFactory.getCurrentSession())
+		preloader.aufbauNodeMap()
+		render ("ende  test preloader")
+	}
+	def load() {
+		render ("AdressTabelle wird zu Strassen verdichtet")
+		def List strList = Adresse.strassen
+		def List selList = [45711,45731]
+		def cntStr = 0, cntLoad = 0
+		strList.each {
+			cntStr++
+			Strasse strasse = new Strasse(ort:it[0],postleitzahl:it[1].toInteger(),ortsteil:Ortsteil.findById(it[2]),strasse:it[3],hausNrVon:it[4],hausNrBis:it[5])
+			if(it[1].toInteger() in selList)
+				if (strasse.save())
+					cntLoad++
+					else
+						strasse.errors.each {
+						println it
+					}
+				}
+		def hibSession = sessionFactory.getCurrentSession()
+		assert hibSession != null
+		hibSession.flush()
+		render ("------AdressTabelle wurde zu ${cntStr} Strassen verdichtet, ${cntLoad} in Strassentabelle geladen ")
+	}
+	def preload() {
+		render ("AdressTabelle wird aus OSM geladen")
+		def startZeit = Calendar.instance
+		println "timeIs=${startZeit.time}"
+		def hibSession = sessionFactory.getCurrentSession()
+		assert hibSession != null
+		def BigDecimal minlat, maxlat, minlon, maxlon
+		Preloader preloader = new Preloader(eingabeMap:"/vol/map",hibSession:sessionFactory.getCurrentSession())
+		
+		//nodeMap aufbauen
+		preloader.aufbauNodeMap()
+		
+		//sichere Adressen aufbauen
+		preloader.sichAdr()
+		
+		//hergeleitete Adressen aufbauen
+		preloader.herlAdr()
+		
+		def endeZeit = Calendar.instance
+		println "endeZeit=${endeZeit.time}"
+		println "startZeit=${startZeit.time}"
+		render (" Adress Tabelle wurde aus OSM geladen, ${preloader.cntRead} Zeilen gelesen, ${preloader.cntAdr} Adressen gefunden, ${preloader.cntLoad} Adressen geladen")
+			
+	}
+
+	String tagVal (String line, String x) {
+		Integer anfKey = line.trim().indexOf("${x}=") + x.length() + 2
+		Integer endKey = line.trim().indexOf('"', anfKey)
+		line.trim().substring(anfKey, endKey)
+	}
+	
+	def ladePlzKoeln() {
 		render ("Straßen Tabelle wird aus ExcelDatei geladen")
 		// öffnen ExcelDatei
 		POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/vol/strassenKöln.xls"));
