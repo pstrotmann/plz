@@ -8,6 +8,9 @@ stacktrace.log
 /*.log
 /*Db.*
 /*db.*
+/plzDb.h2.db
+/plzDb.lock.db
+/plzDb.trace.db
 /cobertura.ser
 .DS_Store
 /target/
