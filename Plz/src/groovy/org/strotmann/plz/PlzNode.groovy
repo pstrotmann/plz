@@ -23,9 +23,9 @@ class PlzNode {
 	
 	static String plzNodeKey (BigDecimal minlat, BigDecimal maxlat, BigDecimal minlon, BigDecimal maxlon, BigDecimal lat, BigDecimal lon) {
 		String nodeKey = ""
-	  String latPart = (((lat - minlat)/(maxlat - minlat))*10).intValue().toString()
+	  String latPart = (((lat - minlat).abs()/(maxlat - minlat))*10).intValue().toString()
 	  nodeKey += latPart
-	  String lonPart = (((lon - minlon)/(maxlon - minlon))*10).intValue().toString()
+	  String lonPart = (((lon - minlon).abs()/(maxlon - minlon))*10).intValue().toString()
 	  nodeKey += lonPart
 	  nodeKey
   }

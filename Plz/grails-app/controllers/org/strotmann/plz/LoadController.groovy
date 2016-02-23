@@ -21,19 +21,18 @@ class LoadController {
 	def load() {
 		render ("AdressTabelle wird zu Strassen verdichtet")
 		def List strList = Adresse.strassen
-		def List selList = [45711,45731]
 		def cntStr = 0, cntLoad = 0
 		strList.each {
 			cntStr++
 			Strasse strasse = new Strasse(ort:it[0],postleitzahl:it[1].toInteger(),ortsteil:Ortsteil.findById(it[2]),strasse:it[3],hausNrVon:it[4],hausNrBis:it[5])
-			if(it[1].toInteger() in selList)
-				if (strasse.save())
-					cntLoad++
-					else
-						strasse.errors.each {
-						println it
-					}
+			if (strasse.save())
+				cntLoad++
+				else
+					strasse.errors.each {
+					println it
 				}
+		}
+			
 		def hibSession = sessionFactory.getCurrentSession()
 		assert hibSession != null
 		hibSession.flush()
