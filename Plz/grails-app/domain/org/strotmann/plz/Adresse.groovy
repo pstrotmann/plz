@@ -17,21 +17,7 @@ class Adresse {
     }
 	
 	String toString() {"${ort},${plz},${str},${hnr}" }
-	
-	static List getStrassen () {
-		def c = Adresse.createCriteria()
 		
-		def results = c.list {
-
-			'in' ('plz',[45739])
-			projections {
-				sqlGroupProjection 'ort, plz, ortsteil_id, str, min(hnr) as hnrVon, max(hnr) as hnrBis', 'ort, plz, ortsteil_id, str', ['ort','plz','ortsteil_id','str','hnrVon','hnrBis'], [STRING,STRING,INTEGER,STRING,STRING,STRING]
-			}
-		}
-		
-		results
-	}
-	
 	static List hNrn(String hnr)  {
 		
 		List <String> hnrTeile = [] 
