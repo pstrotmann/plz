@@ -36,7 +36,8 @@ class Sucher {
 		if (params.postleitzahl) l[3] = 1
 		if (params.ort) l[4] = 1
 		if (l == [1,0,0,0,1] || l == [1,1,0,0,1]) 
-			return getMatchesStrasseHnrOrt(params.strasse, params.hausnummer, params.ort)
+			//return getMatchesStrasseHnrOrt(params.strasse, params.hausnummer, params.ort)
+			return plzZuStrasseHnrOrt(params.strasse, params.hausnummer, params.ort)
 		if (l == [0,0,0,0,1]) 
 			return getMatchesOrt(params.ort)
 		if (l == [0,0,0,1,0])
@@ -159,6 +160,16 @@ class Sucher {
 				sHnrList << s
 		}
 		sHnrList.sort{a,b -> a.ort <=> b.ort?:(a.strasse<=>b.strasse)?:(a.hnrVon<=>b.hnrVon)}
+	}
+	
+	static List plzZuStrasseHnrOrt(String strasse, String hnr, String ort) {
+		List <Sucher> sList = []
+		PlzSearch plzSearch = new PlzSearch()
+		plzSearch.suchePlz("${hnr} ${strasse}", ort).each {
+			Sucher s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort)
+			sList << s
+		}
+		sList
 	}
 	
 	Boolean getMitStrassen () {
