@@ -13,10 +13,12 @@ class LoadController {
 	SessionFactory sessionFactory
 	
 	def index() {
-		render ("start test preloader")
-		Preloader preloader = new Preloader(hibSession:sessionFactory.getCurrentSession())
-		preloader.aufbauNodeMap()
-		render ("ende  test preloader")
+		render ("start test nominatim")
+		PlzSearch plzSearch = new PlzSearch()
+		println plzSearch.suchePlz("5 Athener", "Frankfurt")
+		println plzSearch.suchePlz("Evinger", "Dortmund")
+		println plzSearch.suchePlz("2345 Südring", "Datteln")
+		render ("ende  test nominatim")
 	}
 	def load() {
 		render ("AdressTabelle wird zu Strassen verdichtet")

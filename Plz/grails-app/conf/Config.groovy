@@ -118,3 +118,5 @@ log4j.main = {
            'org.hibernate',
            'net.sf.ehcache.hibernate'
 }
+//IP-Adressen von Webservices
+nominatimService='http://nominatim.openstreetmap.org'
