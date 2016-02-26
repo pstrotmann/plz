@@ -10,7 +10,7 @@ class Sucher {
 	String zusatz
 	Integer postleitzahl
 	String ort
-	Ortsteil ortsteil
+	String ortsteil
 	Integer strasseId
 	
 	Integer hnrVon
@@ -166,7 +166,7 @@ class Sucher {
 		List <Sucher> sList = []
 		PlzSearch plzSearch = new PlzSearch()
 		plzSearch.suchePlz("${hnr} ${strasse}", ort).each {
-			Sucher s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort)
+			Sucher s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil)
 			sList << s
 		}
 		sList
@@ -183,6 +183,7 @@ class Sucher {
 	}
 	
 	String getOrtsteilName() {
+		println ortsteil
 		if (!ortsteil)
 			return null
 		else

@@ -61,7 +61,7 @@
 						
 						<td>${fieldValue(bean: sucherInstance, field: "hnrBis")}</td>
 						
-						<td>${fieldValue(bean: sucherInstance, field: "ortsteilName")}</td>
+						<td>${fieldValue(bean: sucherInstance, field: "ortsteil")}</td>
 											
 					</tr>
 				</g:each>

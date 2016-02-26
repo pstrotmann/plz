@@ -9,5 +9,5 @@ class StrPlzOrt {
 	String zusBis
 	Integer postleitzahl
 	String ort
-
+	String ortsteilName
 }

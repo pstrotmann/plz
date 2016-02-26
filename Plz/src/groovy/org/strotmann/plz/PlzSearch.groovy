@@ -11,28 +11,48 @@ class PlzSearch {
 	def RestBuilder rest = new RestBuilder()
 	def RestResponse resp
 	
-	List <StrPlzOrt> suchePlz (String hnrStrasse, String ort) {
+	List <Sucher> suchePlz (String hnrStrasse, String ort) {
 		resp = rest.get("${Holders.config.nominatimService}/search?street=${hnrStrasse}&city=${ort}&country=Germany&format=json&addressdetails=1")
-		List plzList = []
-		String plz,str,city
+		List <Sucher> plzList = []
+		
 		JSONArray array = new JSONArray(resp.text)
 		for (int i=0;i<array.length();i++) {
+			
+			String plz=null,str=null,city=null,ortsteil=null
+			
 			JSONObject jsonObject = array.getJSONObject(i)
-			plz = jsonObject["address"]["postcode"]
-			str = jsonObject["address"]["road"]
-			city = jsonObject["address"]["city"]
-			StrPlzOrt s = new StrPlzOrt(postleitzahl:plz.toInteger(),strasse:str,ort:city)
-			if (!inPlzList(plzList,s) && str)
-				plzList << s
+			JSONObject adrObj = jsonObject["address"]
+			
+			plz = (adrObj["postcode"]).toString()
+			if (!plz.isNumber())
+				plz = null
+				
+			str = adrObj["road"]
+			
+			if (adrObj["city"] && adrObj["city"].toString().toUpperCase() == ort.toUpperCase())
+				city = adrObj["city"].toString() 
+			else if (adrObj["town"] && adrObj["town"].toString().toUpperCase() == ort.toUpperCase())
+					city = adrObj["town"].toString()
+					else if (adrObj["county"] && adrObj["county"].toString().toUpperCase() == ort.toUpperCase())
+							city = adrObj["county"].toString()
+			println "city=${city}"
+			
+			ortsteil = adrObj["suburb"]
+			
+			if ( plz && str && city) {
+				Sucher s = new Sucher(postleitzahl:plz.toInteger(),strasse:str,ort:city,ortsteil:ortsteil)
+				if(!inPlzList(plzList,s))
+					plzList << s
 			}
+		}
 		plzList.sort{it.postleitzahl}
 		
 	}
 	
-	Boolean inPlzList (List l, StrPlzOrt s) {
+	Boolean inPlzList (List l, Sucher s) {
 		boolean r = false
-		l.each {StrPlzOrt spo ->
-			if (spo.postleitzahl == s.postleitzahl && spo.strasse == s.strasse) 
+		l.each {Sucher su ->
+			if (su.postleitzahl == s.postleitzahl && su.strasse == s.strasse) 
 				r = true
 		}
 		r
