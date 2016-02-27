@@ -12,7 +12,7 @@ class PlzSearch {
 	def RestResponse resp
 	
 	List <Sucher> suchePlz (String hnrStrasse, String ort) {
-		resp = rest.get("${Holders.config.nominatimService}/search?street=${hnrStrasse}&city=${ort}&country=Germany&format=json&addressdetails=1")
+		resp = rest.get("${Holders.config.nominatimService}/search?street=${hnrStrasse}&city=${ort}&country=Deutschland&format=json&addressdetails=1")
 		List <Sucher> plzList = []
 		
 		JSONArray array = new JSONArray(resp.text)
@@ -35,13 +35,12 @@ class PlzSearch {
 					city = adrObj["town"].toString()
 					else if (adrObj["county"] && adrObj["county"].toString().toUpperCase() == ort.toUpperCase())
 							city = adrObj["county"].toString()
-			println "city=${city}"
 			
 			ortsteil = adrObj["suburb"]
 			
 			if ( plz && str && city) {
 				Sucher s = new Sucher(postleitzahl:plz.toInteger(),strasse:str,ort:city,ortsteil:ortsteil)
-				if(!inPlzList(plzList,s))
+				if(!inPlzList(plzList,s) && strOk(hnrStrasse, str))
 					plzList << s
 			}
 		}
@@ -56,5 +55,21 @@ class PlzSearch {
 				r = true
 		}
 		r
+	}
+	
+	Boolean strOk (String hnrStr, String str) {
+		String vgl1, vgl2
+		List <String> s1 = hnrStr.split()
+		if (s1[0].isNumber())
+			vgl1 = s1[1]
+		else
+			vgl1 = s1[0]
+		List <String> s2 = str.split(' ')
+		vgl2 = s2[0]
+		Integer l = vgl1.size() < vgl2.size() ? vgl1.size() : vgl2.size()
+		if (vgl1.substring(0, l-1).trim().toUpperCase() == vgl2.substring(0, l-1).trim().toUpperCase())
+			return true
+		else
+			return false
 	}
 }

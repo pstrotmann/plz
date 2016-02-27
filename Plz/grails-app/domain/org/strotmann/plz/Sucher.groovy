@@ -165,7 +165,7 @@ class Sucher {
 	static List plzZuStrasseHnrOrt(String strasse, String hnr, String ort) {
 		List <Sucher> sList = []
 		PlzSearch plzSearch = new PlzSearch()
-		plzSearch.suchePlz("${hnr} ${strasse}", ort).each {
+		plzSearch.suchePlz("${hnr} ${strasse}", ort.trim()).each {
 			Sucher s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil)
 			sList << s
 		}
