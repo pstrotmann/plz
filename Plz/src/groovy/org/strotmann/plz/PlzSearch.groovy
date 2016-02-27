@@ -66,7 +66,7 @@ class PlzSearch {
 			vgl1 = s1[1]
 		else
 			vgl1 = s1[0]
-		List <String> s2 = str.split()
+		List <String> s2 = str.split("-| ")
 		vgl2 = s2[0]
 		Integer l = vgl1.size() < vgl2.size() ? vgl1.size() : vgl2.size()
 		if (vgl1.substring(0, l-1).trim().toUpperCase() == vgl2.substring(0, l-1).trim().toUpperCase())
