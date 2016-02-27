@@ -29,12 +29,14 @@ class PlzSearch {
 				
 			str = adrObj["road"]
 			
-			if (adrObj["city"] && adrObj["city"].toString().toUpperCase() == ort.toUpperCase())
+			if (adrObj["city"] && ortOk(adrObj["city"].toString(),ort))
 				city = adrObj["city"].toString() 
-			else if (adrObj["town"] && adrObj["town"].toString().toUpperCase() == ort.toUpperCase())
+			else if (adrObj["town"] && ortOk(adrObj["town"].toString(),ort))
 					city = adrObj["town"].toString()
-					else if (adrObj["county"] && adrObj["county"].toString().toUpperCase() == ort.toUpperCase())
-							city = adrObj["county"].toString()
+				else if (adrObj["county"] && ortOk(adrObj["county"].toString(),ort))
+						city = adrObj["county"].toString()
+					else if (adrObj["village"] && ortOk(adrObj["village"].toString(),ort))
+							city = adrObj["village"].toString()
 			
 			ortsteil = adrObj["suburb"]
 			
@@ -64,7 +66,20 @@ class PlzSearch {
 			vgl1 = s1[1]
 		else
 			vgl1 = s1[0]
-		List <String> s2 = str.split(' ')
+		List <String> s2 = str.split()
+		vgl2 = s2[0]
+		Integer l = vgl1.size() < vgl2.size() ? vgl1.size() : vgl2.size()
+		if (vgl1.substring(0, l-1).trim().toUpperCase() == vgl2.substring(0, l-1).trim().toUpperCase())
+			return true
+		else
+			return false
+	}
+	
+	Boolean ortOk (String city, String ort) {
+		String vgl1, vgl2
+		List <String> s1 = ort.split("-| ")
+		vgl1 = s1[0]
+		List <String> s2 = city.split("-| ")
 		vgl2 = s2[0]
 		Integer l = vgl1.size() < vgl2.size() ? vgl1.size() : vgl2.size()
 		if (vgl1.substring(0, l-1).trim().toUpperCase() == vgl2.substring(0, l-1).trim().toUpperCase())
