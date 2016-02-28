@@ -36,6 +36,14 @@ class Postleitzahl {
 		l
 	}
 	
+	static List getOrte() {
+		List <String> oList = []
+		Postleitzahl.list().each {
+			oList << it.ort
+		}
+		oList.unique().sort{it}
+	}
+	
 	static Integer bundeslandId (String bundesland) {
 		def found = Holders.config.bundesland.find {entry -> entry.value == bundesland }
 		found.key
