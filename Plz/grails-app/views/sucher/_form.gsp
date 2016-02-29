@@ -7,9 +7,19 @@
 		<g:message code="sucher.ort.label" default="Ort" />
 		
 	</label>
-<%--	<g:textField name="ort" value="${sucherInstance?.ort}"/>--%>
-	<g:select name="ort" from="${Postleitzahl.orte}" value="${sucherInstance?.ort}" valueMessagePrefix="sucher.ort" noSelection="['': '']"/>
+<%--	<g:textField name="ort" value="${sucherInstance?.ort}" />--%>
+		<g:remoteField name="ort" value="${sucherInstance?.ort}" onchange="ortChanged(this.value);"/>
+<%--	<g:select name="ort" from="${Postleitzahl.orte}" value="${sucherInstance?.ort}" valueMessagePrefix="sucher.ort" noSelection="['': '']"/>--%>
+	<span id="subContainer"></span>
 </div>
+
+<script>
+     function ortChanged(ort) {
+         <g:remoteFunction controller="sucher" action="ortChanged"
+             update="subContainer"
+             params="'ort='+ort"/>
+     }
+</script>
 
 <div class="fieldcontain ${hasErrors(bean: sucherInstance, field: 'strasse', 'error')} ">
 	<label for="strasse">
