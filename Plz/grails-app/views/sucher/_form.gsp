@@ -1,15 +1,11 @@
 <%@ page import="org.strotmann.plz.Sucher" %>
-<%@ page import="org.strotmann.plz.Postleitzahl" %>
-
 
 <div class="fieldcontain ${hasErrors(bean: sucherInstance, field: 'ort', 'error')} ">
 	<label for="ort">
 		<g:message code="sucher.ort.label" default="Ort" />
 		
 	</label>
-<%--	<g:textField name="ort" value="${sucherInstance?.ort}" />--%>
 		<g:remoteField name="ort" value="${sucherInstance?.ort}" onchange="ortChanged(this.value);"/>
-<%--	<g:select name="ort" from="${Postleitzahl.orte}" value="${sucherInstance?.ort}" valueMessagePrefix="sucher.ort" noSelection="['': '']"/>--%>
 	<span id="subContainer"></span>
 </div>
 

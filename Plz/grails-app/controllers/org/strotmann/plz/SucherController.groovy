@@ -18,7 +18,6 @@ class SucherController {
 
 	def list(Integer max) {
 		def sucherInstanceList = Sucher.getMatches(params)
-		
 		params.max = Math.min(max ?: 10, 100)
 		[sucherInstanceList: sucherInstanceList, sucherInstanceTotal: Sucher.count()]
 		
@@ -27,18 +26,15 @@ class SucherController {
 	def ortChanged(String ort) {
 		def subCategories = []
 		
-		if ( ort != null ) {
+		if ( ort != null && ort.size() > 0 ) {
 			String s = ort.substring(0,1).toUpperCase()+ort.substring(1)
 			subCategories = Postleitzahl.findAllByOrtLike(s+'%', [order:'ort']).unique{it.ort}
 		}
-//		render g.select(id:'subCategory', name:'subCategory.id',
-//			from:subCategories, optionKey:'id', noSelection:[null:' ']
-//		)
 		def List orte = []
 		subCategories.each {
 			orte << it.ort
 		}
-		render g.select(name:'ort',	from:orte, noSelection:[null:' '])
+		render g.select(name:'ortSelect',	from:orte, noSelection:[null:' '])
 	}
     
 }
