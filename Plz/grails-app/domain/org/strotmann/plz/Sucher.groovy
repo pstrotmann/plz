@@ -27,19 +27,17 @@ class Sucher {
     }
 	
 	static List getMatches(Map params) {
-		String ort
-		if (params.ortSelect && params.ortSelect != 'null')
-			 ort = params.ortSelect
-		else ort = params.ort
+		String ort = normalNull(params.ortSelect)?:params.ort
+		String strasse = normalNull(params.strasseSelect)?:params.strasse
 		List l = [0,0,0,0,0]
-		if (params.strasse) l[0] = 1
+		if (strasse) l[0] = 1
 		if (params.hausnummer) l[1] = 1
 		if (params.zusatz) l[2] = 1
 		if (params.postleitzahl) l[3] = 1
 		if (ort) l[4] = 1
 		if (l == [1,0,0,0,1] || l == [1,1,0,0,1]) 
 			//return getMatchesStrasseHnrOrt(params.strasse, params.hausnummer, params.ort)
-			return plzZuStrasseHnrOrt(params.strasse, params.hausnummer, ort)
+			return plzZuStrasseHnrOrt(strasse, params.hausnummer, ort)
 		if (l == [0,0,0,0,1]) 
 			return getMatchesOrt(ort)
 		if (l == [0,0,0,1,0])
@@ -215,6 +213,16 @@ class Sucher {
 				a += s
 		}
 		a
+	}
+	
+	static String normalNull (String s) {
+		if (s)
+			if (s == 'null')
+				return null
+			else
+				return s
+		else
+			return null
 	}
 	
 }

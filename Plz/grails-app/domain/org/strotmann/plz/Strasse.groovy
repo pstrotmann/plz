@@ -21,6 +21,7 @@ class Strasse {
 	static mapping = {
 		strasse column: "strasse", index: "strasse"
 		postleitzahl column: "postleitzahl", index: "postleitzahl"
+		ort column: "ort", index: "city"
 	}
 	
 	String toString() {"${postleitzahl} ${ortsteil} ${strasse} ${hausNrVon} ${hausNrBis}" }

@@ -24,17 +24,40 @@ class SucherController {
 	}
 	
 	def ortChanged(String ort) {
-		def subCategories = []
+		session.ort = ort
+		def postleitzahlen = []
 		
 		if ( ort != null && ort.size() > 0 ) {
 			String s = ort.substring(0,1).toUpperCase()+ort.substring(1)
-			subCategories = Postleitzahl.findAllByOrtLike(s+'%', [order:'ort']).unique{it.ort}
+			postleitzahlen = Postleitzahl.findAllByOrtLike(s+'%', [order:'ort']).unique{it.ort}
 		}
 		def List orte = []
-		subCategories.each {
+		postleitzahlen.each {
 			orte << it.ort
 		}
 		render g.select(name:'ortSelect',	from:orte, noSelection:[null:' '])
 	}
     
+	def strChanged(String str) {
+		String ort = session.ort
+		def strassen = []
+		String s = null, o = null
+		if ( str != null && str.size() > 0 )
+			s = str.substring(0,1).toUpperCase()+str.substring(1)
+		if ( ort != null && ort.size() > 0 )
+			o = ort.substring(0,1).toUpperCase()+ort.substring(1)
+		if (s && o)
+			strassen = Strasse.findAllByOrtLikeAndStrasseLike(o+'%', s+'%', [order:'strasse']).unique{it.strasse}
+		else
+			if (o)
+				strassen = Strasse.findAllByOrtLike(o+'%', [order:'strasse']).unique{it.strasse}
+			else
+				strassen = []
+		
+		def List strNamen = []
+		strassen.each {
+			strNamen << it.strasse
+		}
+		render g.select(name:'strasseSelect',	from:strNamen, noSelection:[null:' '])
+	}
 }

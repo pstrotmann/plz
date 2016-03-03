@@ -6,13 +6,13 @@
 		
 	</label>
 		<g:remoteField name="ort" value="${sucherInstance?.ort}" onchange="ortChanged(this.value);"/>
-	<span id="subContainer"></span>
+	<span id="subOrt"></span>
 </div>
 
 <script>
      function ortChanged(ort) {
          <g:remoteFunction controller="sucher" action="ortChanged"
-             update="subContainer"
+             update="subOrt"
              params="'ort='+ort"/>
      }
 </script>
@@ -22,9 +22,17 @@
 		<g:message code="sucher.strasse.label" default="Strasse" />
 		
 	</label>
-	<g:textField name="strasse" value="${sucherInstance?.strasse}"/>
-
+		<g:remoteField name="strasse" value="${sucherInstance?.strasse}" onchange="strChanged(this.value);"/>
+	<span id="subStr"></span>
 </div>
+
+<script>
+     function strChanged(str) {
+         <g:remoteFunction controller="sucher" action="strChanged"
+             update="subStr"
+             params="'str='+str"/>
+     }
+</script>
 
 <div class="fieldcontain ${hasErrors(bean: sucherInstance, field: 'hausnummer', 'error')} ">
 	<label for="hausnummer">
