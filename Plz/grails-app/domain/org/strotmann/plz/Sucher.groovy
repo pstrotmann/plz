@@ -12,6 +12,7 @@ class Sucher {
 	String ort
 	String ortsteil
 	Integer strasseId
+	String adrObj
 	
 	Integer hnrVon
 	String zusVon
@@ -169,11 +170,11 @@ class Sucher {
 			Strasse str = Strasse.findByPostleitzahlAndStrasse(it.postleitzahl,strasse)
 			Sucher s 
 			if (str)
-				s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil,
+				s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil,adrObj:it.adrObj,
 									hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
 									zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),)
 			else
-				s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil)
+				s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil,adrObj:it.adrObj)
 			sList << s
 		}
 		sList

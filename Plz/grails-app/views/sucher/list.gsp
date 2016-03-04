@@ -53,7 +53,7 @@
 						</g:else>
 						<td>${fieldValue(bean: sucherInstance, field: "ort")}</td>
 						<td>
-							<g:link controller="strasse" action="show" params="[id:sucherInstance.strasseId]" >
+							<g:link action="show" params="[id:sucherInstance.strasseId]" >
 								${fieldValue(bean: sucherInstance, field: "strasse")}
 							</g:link>
 						</td>

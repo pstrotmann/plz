@@ -41,7 +41,7 @@ class PlzSearch {
 			ortsteil = adrObj["suburb"]
 			
 			if ( plz && str && city) {
-				Sucher s = new Sucher(postleitzahl:plz.toInteger(),strasse:str,ort:city,ortsteil:ortsteil)
+				Sucher s = new Sucher(postleitzahl:plz.toInteger(),strasse:str,ort:city,ortsteil:ortsteil,adrObj:adrObj.toString())
 				if(!inPlzList(plzList,s) && strOk(hnrStrasse, str))
 					plzList << s
 			}
