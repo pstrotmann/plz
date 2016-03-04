@@ -166,7 +166,14 @@ class Sucher {
 		List <Sucher> sList = []
 		PlzSearch plzSearch = new PlzSearch()
 		plzSearch.suchePlz("${hnr} ${strasse}", ort.trim()).each {
-			Sucher s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil)
+			Strasse str = Strasse.findByPostleitzahlAndStrasse(it.postleitzahl,strasse)
+			Sucher s 
+			if (str)
+				s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil,
+									hnrVon:hnrN(str.hausNrVon),hnrBis:hnrN(str.hausNrBis),
+									zusVon:hnrA(str.hausNrVon),zusBis:hnrA(str.hausNrBis),)
+			else
+				s = new Sucher(postleitzahl:it.postleitzahl,strasse:it.strasse,ort:it.ort,ortsteil:it.ortsteil)
 			sList << s
 		}
 		sList
