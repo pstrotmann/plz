@@ -233,4 +233,9 @@ class Sucher {
 			return null
 	}
 	
+	List getAdrParts () {
+		adrObj = adrObj.replace('{', ' ').replace('}', ' ').trim()
+		adrObj.split(',')
+	}
+	
 }

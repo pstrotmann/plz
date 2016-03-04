@@ -67,16 +67,7 @@
 					
 				</li>
 				</g:if>
-			
-				<g:if test="${sucherInstance?.adrObj}">
-				<li class="fieldcontain">
-					<span id="adrObj-label" class="property-label"><g:message code="sucher.adrObj.label" default="Adr Obj" /></span>
-					
-						<span class="property-value" aria-labelledby="adrObj-label"><g:fieldValue bean="${sucherInstance}" field="adrObj"/></span>
-					
-				</li>
-				</g:if>
-			
+						
 				<g:if test="${sucherInstance?.hnrBis}">
 				<li class="fieldcontain">
 					<span id="hnrBis-label" class="property-label"><g:message code="sucher.hnrBis.label" default="Hnr Bis" /></span>
@@ -132,6 +123,11 @@
 				</g:if>
 			
 			</ol>
+			
+			<g:each in="${sucherInstance?.adrParts}" var="adrPart">
+				<p>${adrPart}</p>
+			</g:each>
+				
 			<g:form url="[resource:sucherInstance, action:'delete']" method="DELETE">
 				<fieldset class="buttons">
 					<g:link class="edit" action="edit" resource="${sucherInstance}"><g:message code="default.button.edit.label" default="Edit" /></g:link>
