@@ -122,12 +122,15 @@
 					
 				</li>
 				</g:if>
+				
+				<g:each in="${sucherInstance?.adrParts}" var="adrPart">
+				<li class="fieldcontain">
+					<span id="obj-label" class="property-label"><g:message code="obj.label" default=" " /></span>
+					<span class="property-value" aria-labelledby="obj-label">${adrPart}</span>
+				</li>
+				</g:each>
 			
 			</ol>
-			
-			<g:each in="${sucherInstance?.adrParts}" var="adrPart">
-				<p>${adrPart}</p>
-			</g:each>
 				
 			<g:form url="[resource:sucherInstance, action:'delete']" method="DELETE">
 				<fieldset class="buttons">
