@@ -23,7 +23,7 @@ class SucherController {
 
 	def list(Integer max) {
 		def sucherInstanceList = Sucher.getMatches(params)
-		if (sucherInstanceList.size() == 1) {
+		if (sucherInstanceList && sucherInstanceList.size() == 1) {
 			flash.sucher = sucherInstanceList[0]
 			redirect(action: "show", params: params)
 		}
