@@ -35,10 +35,10 @@ class PlzSearch {
 					city = adrObj["town"].toString()
 				else if (adrObj["county"] && ortOk(adrObj["county"].toString(),ort))
 						city = adrObj["county"].toString()
-					else if (adrObj["village"] && ortOk(adrObj["village"].toString(),ort))
-							city = adrObj["village"].toString()
-						else if (adrObj["state"] && ortOk(adrObj["state"].toString(),ort))
-								city = adrObj["state"].toString()
+					else if (adrObj["state"] && ortOk(adrObj["state"].toString(),ort))
+							city = adrObj["state"].toString()
+						else if (adrObj["village"])
+								city = adrObj["village"].toString()
 			
 			ortsteil = adrObj["suburb"]
 			
