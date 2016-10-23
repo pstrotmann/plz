@@ -52,11 +52,9 @@
 							<td>${fieldValue(bean: sucherInstance, field: "plz5")}</td>
 						</g:else>
 						<td>${fieldValue(bean: sucherInstance, field: "ort")}</td>
-						<td>
-							<g:link action="show" params="[id:sucherInstance.strasseId]" >
-								${fieldValue(bean: sucherInstance, field: "strasse")}
-							</g:link>
-						</td>
+						
+						<td>${fieldValue(bean: sucherInstance, field: "strasse")}</td>
+						
 						<td>${fieldValue(bean: sucherInstance, field: "hnrVon")}</td>
 						
 						<td>${fieldValue(bean: sucherInstance, field: "hnrBis")}</td>
